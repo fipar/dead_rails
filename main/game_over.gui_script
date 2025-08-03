@@ -1,0 +1,36 @@
+function init(self)
+    -- Hide the game over screen initially
+    local background = gui.get_node("background")
+    local game_over_text = gui.get_node("game_over_text")
+    local restart_text = gui.get_node("restart_text")
+    
+    gui.set_enabled(background, false)
+    gui.set_enabled(game_over_text, false)
+    gui.set_enabled(restart_text, false)
+    
+    print("Game over GUI initialized")
+end
+
+function on_message(self, message_id, message, sender)
+    print("Game over GUI received message:", message_id)
+    
+    if message_id == hash("show_game_over") then
+        print("Showing game over screen")
+        local background = gui.get_node("background")
+        local game_over_text = gui.get_node("game_over_text")
+        local restart_text = gui.get_node("restart_text")
+        
+        gui.set_enabled(background, true)
+        gui.set_enabled(game_over_text, true)
+        gui.set_enabled(restart_text, true)
+    elseif message_id == hash("hide_game_over") then
+        print("Hiding game over screen")
+        local background = gui.get_node("background")
+        local game_over_text = gui.get_node("game_over_text")
+        local restart_text = gui.get_node("restart_text")
+        
+        gui.set_enabled(background, false)
+        gui.set_enabled(game_over_text, false)
+        gui.set_enabled(restart_text, false)
+    end
+end

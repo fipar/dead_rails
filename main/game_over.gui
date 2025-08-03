@@ -1,0 +1,73 @@
+script: "/main/game_over.gui_script"
+fonts {
+  name: "main_font"
+  font: "/main/main.font"
+}
+nodes {
+  size {
+    x: 960.0
+    y: 640.0
+    z: 0.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.8
+  }
+  type: TYPE_BOX
+  id: "background"
+  pivot: PIVOT_CENTER
+  position {
+    x: 480.0
+    y: 320.0
+    z: 0.0
+  }
+}
+nodes {
+  size {
+    x: 400.0
+    y: 100.0
+    z: 0.0
+  }
+  color {
+    x: 1.0
+    y: 0.2
+    z: 0.2
+    w: 1.0
+  }
+  type: TYPE_TEXT
+  text: "GAME OVER!"
+  font: "main_font"
+  id: "game_over_text"
+  pivot: PIVOT_CENTER
+  position {
+    x: 480.0
+    y: 370.0
+    z: 0.0
+  }
+}
+nodes {
+  size {
+    x: 300.0
+    y: 50.0
+    z: 0.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  type: TYPE_TEXT
+  text: "Press R to restart"
+  font: "main_font"
+  id: "restart_text"
+  pivot: PIVOT_CENTER
+  position {
+    x: 480.0
+    y: 290.0
+    z: 0.0
+  }
+}
+material: "/builtins/materials/gui.material"
