@@ -1,7 +1,8 @@
 function init(self)
-    self.speed = 80
+    self.speed = 60
     self.player_url = nil
     self.catch_distance = 30
+    self.enabled = true
     sprite.play_flipbook("#sprite", "walk")
     
     -- Find the player object
@@ -9,6 +10,10 @@ function init(self)
 end
 
 function update(self, dt)
+    if not self.enabled then
+        return
+    end
+    
     if self.player_url then
         local zombie_pos = go.get_position()
         local player_pos = go.get_position(self.player_url)
@@ -34,5 +39,15 @@ function update(self, dt)
             
             go.set_position(zombie_pos)
         end
+    end
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("disable") then
+        self.enabled = false
+        sprite.play_flipbook("#sprite", "idle")
+    elseif message_id == hash("enable") then
+        self.enabled = true
+        sprite.play_flipbook("#sprite", "walk")
     end
 end

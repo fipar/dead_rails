@@ -1,7 +1,8 @@
 function init(self)
     msg.post(".", "acquire_input_focus")
-    self.speed = 200
+    self.speed = 350
     self.current_animation = "idle"
+    self.input_enabled = true
     
     -- Track which keys are pressed
     self.keys_pressed = {
@@ -13,6 +14,10 @@ function init(self)
 end
 
 function update(self, dt)
+    if not self.input_enabled then
+        return
+    end
+    
     local pos = go.get_position()
     local move_x = 0
     local move_y = 0
@@ -36,12 +41,7 @@ function update(self, dt)
         moving = true
     end
     
-    -- Normalize diagonal movement to maintain consistent speed
-    if move_x ~= 0 and move_y ~= 0 then
-        local length = math.sqrt(move_x * move_x + move_y * move_y)
-        move_x = move_x / length
-        move_y = move_y / length
-    end
+    -- Don't normalize - let diagonal movement be faster like most games
     
     -- Apply movement
     if moving then
@@ -81,6 +81,10 @@ function update(self, dt)
 end
 
 function on_input(self, action_id, action)
+    if not self.input_enabled then
+        return
+    end
+    
     if action_id == hash("up") then
         self.keys_pressed.up = action.pressed or action.repeated
     elseif action_id == hash("down") then
@@ -89,5 +93,18 @@ function on_input(self, action_id, action)
         self.keys_pressed.left = action.pressed or action.repeated
     elseif action_id == hash("right") then
         self.keys_pressed.right = action.pressed or action.repeated
+    end
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("disable_input") then
+        self.input_enabled = false
+        -- Clear all pressed keys
+        self.keys_pressed.up = false
+        self.keys_pressed.down = false
+        self.keys_pressed.left = false
+        self.keys_pressed.right = false
+    elseif message_id == hash("enable_input") then
+        self.input_enabled = true
     end
 end

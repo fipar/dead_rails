@@ -30,8 +30,20 @@ function on_message(self, message_id, message, sender)
     if message_id == hash("game_over") then
         if not self.game_over then
             self.game_over = true
-            print("GAME OVER! Press R to restart")
+            
+            -- Stop zombie movement
+            msg.post("/zombie", "disable")
+            
+            -- Disable player input
+            msg.post("/player", "disable_input")
+            
+            -- Take input focus for restart
             msg.post(".", "acquire_input_focus")
+            
+            print("===============================")
+            print("         GAME OVER!")
+            print("    Press R to restart")
+            print("===============================")
         end
     end
 end
@@ -40,6 +52,14 @@ function on_input(self, action_id, action)
     if self.game_over and action_id == hash("restart") and action.pressed then
         -- Restart game
         self.game_over = false
+        
+        -- Enable zombie movement
+        msg.post("/zombie", "enable")
+        
+        -- Enable player input
+        msg.post("/player", "enable_input")
+        
+        -- Release input focus
         msg.post(".", "release_input_focus")
         
         -- Reset player position
