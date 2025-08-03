@@ -1,3 +1,4 @@
+
 function init(self)
     self.speed = 60
     self.player_url = nil
@@ -10,6 +11,7 @@ function init(self)
 end
 
 function update(self, dt)
+    
     if not self.enabled then
         return
     end
