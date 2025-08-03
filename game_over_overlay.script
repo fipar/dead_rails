@@ -1,0 +1,33 @@
+function init(self)
+    self.visible = false
+    -- Start hidden
+    go.set_position(vmath.vector3(-1000, -1000, 0))
+    go.set_scale(vmath.vector3(20, 15, 1))  -- Make it big to cover screen
+    
+    -- Tint it dark for overlay effect
+    sprite.set_constant("#sprite", "tint", vmath.vector4(0.1, 0.1, 0.1, 0.9))
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("show") then
+        self.visible = true
+        -- Move to center of screen
+        go.set_position(vmath.vector3(480, 320, 1))
+        
+        -- Display console overlay for now (until we get a proper image) 
+        print("\n\n╔═══════════════════════════════╗")
+        print("║                               ║")  
+        print("║         GAME OVER!            ║")
+        print("║                               ║")
+        print("║     Press R to restart        ║")
+        print("║                               ║")
+        print("╚═══════════════════════════════╝\n")
+        
+    elseif message_id == hash("hide") then
+        self.visible = false
+        -- Move off screen
+        go.set_position(vmath.vector3(-1000, -1000, 0))
+        
+        print("\n--- Game Restarted! ---\n")
+    end
+end

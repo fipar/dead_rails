@@ -8,6 +8,8 @@ shared_state = 1
 width = 960
 height = 640
 high_dpi = 1
+vsync = 1
+update_frequency = 60
 
 [android]
 input_method = HiddenInputField

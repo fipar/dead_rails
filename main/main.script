@@ -37,13 +37,11 @@ function on_message(self, message_id, message, sender)
             -- Disable player input
             msg.post("/player", "disable_input")
             
+            -- Show game over overlay
+            msg.post("/game_over", "show")
+            
             -- Take input focus for restart
             msg.post(".", "acquire_input_focus")
-            
-            print("===============================")
-            print("         GAME OVER!")
-            print("    Press R to restart")
-            print("===============================")
         end
     end
 end
@@ -56,6 +54,9 @@ function on_input(self, action_id, action)
         -- Enable zombie movement
         msg.post("/zombie", "enable")
         
+        -- Hide game over overlay
+        msg.post("/game_over", "hide")
+        
         -- Enable player input
         msg.post("/player", "enable_input")
         
@@ -67,7 +68,5 @@ function on_input(self, action_id, action)
         
         -- Respawn zombie
         spawn_zombie()
-        
-        print("Game restarted!")
     end
 end

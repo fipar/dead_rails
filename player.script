@@ -1,6 +1,6 @@
 function init(self)
     msg.post(".", "acquire_input_focus")
-    self.speed = 350
+    self.speed = 450
     self.current_animation = "idle"
     self.input_enabled = true
     
@@ -85,6 +85,7 @@ function on_input(self, action_id, action)
         return
     end
     
+    -- Smooth continuous movement
     if action_id == hash("up") then
         self.keys_pressed.up = action.pressed or action.repeated
     elseif action_id == hash("down") then

@@ -1,0 +1,3 @@
+default_animation: "overlay"
+material: "/builtins/materials/sprite.material"
+tile_set: "/overlay.atlas"
