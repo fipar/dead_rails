@@ -20,7 +20,7 @@ function update(self, dt)
         
         -- Check if caught the player
         if distance < self.catch_distance then
-            msg.post("/main", "game_over")
+            msg.post("/main#script", "game_over")
             return
         end
         
