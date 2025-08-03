@@ -1,0 +1,3 @@
+default_animation: "idle"
+material: "/builtins/materials/sprite.material"
+tile_set: "/player.atlas"

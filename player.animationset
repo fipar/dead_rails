@@ -1,0 +1,62 @@
+animations {
+  id: "left"
+  images {
+    image: "/player.atlas/left"
+  }
+  images {
+    image: "/player.atlas/left-2"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "right"
+  images {
+    image: "/player.atlas/right"
+  }
+  images {
+    image: "/player.atlas/right-2"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "up"
+  images {
+    image: "/player.atlas/up"
+  }
+  images {
+    image: "/player.atlas/down"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "down"
+  images {
+    image: "/player.atlas/down"
+  }
+  images {
+    image: "/player.atlas/up"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "idle"
+  images {
+    image: "/player.atlas/down"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 1
+  flip_horizontal: 0
+  flip_vertical: 0
+}
