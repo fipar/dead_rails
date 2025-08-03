@@ -1,0 +1,38 @@
+function init(self)
+    self.speed = 80
+    self.player_url = nil
+    self.catch_distance = 30
+    sprite.play_flipbook("#sprite", "walk")
+    
+    -- Find the player object
+    self.player_url = msg.url("/player")
+end
+
+function update(self, dt)
+    if self.player_url then
+        local zombie_pos = go.get_position()
+        local player_pos = go.get_position(self.player_url)
+        
+        -- Calculate direction to player
+        local dx = player_pos.x - zombie_pos.x
+        local dy = player_pos.y - zombie_pos.y
+        local distance = math.sqrt(dx * dx + dy * dy)
+        
+        -- Check if caught the player
+        if distance < self.catch_distance then
+            msg.post("/main", "game_over")
+            return
+        end
+        
+        -- Move towards player
+        if distance > 0 then
+            local move_x = (dx / distance) * self.speed * dt
+            local move_y = (dy / distance) * self.speed * dt
+            
+            zombie_pos.x = zombie_pos.x + move_x
+            zombie_pos.y = zombie_pos.y + move_y
+            
+            go.set_position(zombie_pos)
+        end
+    end
+end

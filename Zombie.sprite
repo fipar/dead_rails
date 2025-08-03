@@ -1,0 +1,3 @@
+default_animation: "walk"
+material: "/builtins/materials/sprite.material"
+tile_set: "/zombie.atlas"
