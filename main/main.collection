@@ -24,8 +24,8 @@ instances {
   id: "player"
   prototype: "/Player.go"
   position {
-    x: 480.0
-    y: 320.0
+    x: 212.0
+    y: 55.0
     z: 0.0
   }
   rotation {
@@ -44,8 +44,8 @@ instances {
   id: "zombie"
   prototype: "/Zombie.go"
   position {
-    x: 100.0
-    y: 100.0
+    x: 50.0
+    y: 56.0
     z: 0.0
   }
   rotation {
