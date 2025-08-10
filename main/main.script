@@ -70,6 +70,7 @@ function on_message(self, message_id, message, sender)
     if message_id == hash("game_over") then
         if not self.game_over then
             self.game_over = true
+            print("DEBUG: Game over triggered, acquiring input focus for restart")
             
             -- Stop zombie movement
             msg.post("zombie", "disable")
@@ -82,13 +83,24 @@ function on_message(self, message_id, message, sender)
             
             -- Take input focus for restart
             msg.post(".", "acquire_input_focus")
+            print("DEBUG: Input focus acquired for main script restart")
         end
     end
 end
 
 function on_input(self, action_id, action)
+    -- Debug: Log all input during game over / stage complete
+    if (self.game_over or self.stage_complete) then
+        print(string.format("DEBUG MAIN INPUT: action_id=%s, pressed=%s, game_over=%s, stage_complete=%s", 
+              tostring(action_id), tostring(action.pressed), tostring(self.game_over), tostring(self.stage_complete)))
+    end
+    
     -- Handle restart from both game over and stage completion
     if (self.game_over or self.stage_complete) and action_id == hash("restart") and action.pressed then
+        -- Store current states before resetting
+        local was_game_over = self.game_over
+        local was_stage_complete = self.stage_complete
+        
         -- Reset game state
         self.game_over = false
         self.stage_complete = false
@@ -96,15 +108,15 @@ function on_input(self, action_id, action)
         -- Enable zombie movement
         msg.post("zombie", "enable")
         
-        -- Hide game over overlay (if it was shown)
-        if self.game_over then
+        -- Hide game over overlay if it was shown
+        if was_game_over then
             msg.post("game_over", "hide")
         end
         
         -- Enable player input
         msg.post("player", "enable_input")
         
-        -- Release input focus
+        -- Release input focus from main script
         msg.post(".", "release_input_focus")
         
         -- Reset player position to door center
