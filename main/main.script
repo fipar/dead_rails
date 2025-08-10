@@ -5,8 +5,21 @@ function init(self)
     self.screen_width = 960  -- Screen width
     self.screen_height = 640
     
+    -- Debug: Check initial player position
+    local player_pos = go.get_position("player")
+    print(string.format("DEBUG MAIN: Player position at main init: (%.1f, %.1f)", player_pos.x, player_pos.y))
+    
+    -- Force set player position to door center
+    go.set_position(vmath.vector3(212, 55, 0), "player")
+    player_pos = go.get_position("player")
+    print(string.format("DEBUG MAIN: Player position after forced set: (%.1f, %.1f)", player_pos.x, player_pos.y))
+    
     -- Spawn zombie at fixed position
     spawn_zombie()
+    
+    -- Debug: Check player position after spawn_zombie
+    player_pos = go.get_position("player")
+    print(string.format("DEBUG MAIN: Player position after spawn_zombie: (%.1f, %.1f)", player_pos.x, player_pos.y))
 end
 
 function update(self, dt)

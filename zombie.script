@@ -4,6 +4,7 @@ function init(self)
     self.player_url = nil
     self.catch_distance = 30
     self.enabled = true
+    self.debug_printed = false
     sprite.play_flipbook("#sprite", "walk")
     
     -- Find the player object
@@ -19,6 +20,13 @@ function update(self, dt)
     if self.player_url then
         local zombie_pos = go.get_position()
         local player_pos = go.get_position(self.player_url)
+        
+        -- Debug: Print player position once at game start
+        if not self.debug_printed then
+            print(string.format("DEBUG ZOMBIE: Player actual position is (%.1f, %.1f)", player_pos.x, player_pos.y))
+            print(string.format("DEBUG ZOMBIE: Zombie position is (%.1f, %.1f)", zombie_pos.x, zombie_pos.y))
+            self.debug_printed = true
+        end
         
         -- Calculate direction to player
         local dx = player_pos.x - zombie_pos.x

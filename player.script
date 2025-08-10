@@ -6,6 +6,10 @@ function init(self)
     self.direction_x = 0
     self.direction_y = 0
     self.keys_pressed = {}
+    
+    -- Debug: Print initial position
+    local pos = go.get_position()
+    print(string.format("DEBUG PLAYER: Initial position in player init: (%.1f, %.1f)", pos.x, pos.y))
 end
 
 function update(self, dt)
