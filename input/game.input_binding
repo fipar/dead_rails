@@ -2,6 +2,10 @@ mouse_trigger {
   input: MOUSE_BUTTON_1
   action: "touch"
 }
+mouse_trigger {
+  input: MOUSE_BUTTON_1
+  action: "click"
+}
 key_trigger {
   input: KEY_UP
   action: "up"

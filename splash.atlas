@@ -1,0 +1,5 @@
+images {
+  image: "/splash.png"
+}
+margin: 0
+inner_padding: 0

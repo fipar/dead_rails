@@ -1,0 +1,4 @@
+tile_set: "/splash.atlas"
+default_animation: "splash"
+material: "/builtins/materials/sprite.material"
+blend_mode: BLEND_MODE_ALPHA
