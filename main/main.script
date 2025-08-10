@@ -13,10 +13,12 @@ function init(self)
     local player_pos = go.get_position("player")
     print(string.format("DEBUG MAIN: Player position at main init: (%.1f, %.1f)", player_pos.x, player_pos.y))
     
-    -- Force set player position to door center
-    go.set_position(vmath.vector3(212, 55, 0), "player")
-    player_pos = go.get_position("player")
-    print(string.format("DEBUG MAIN: Player position after forced set: (%.1f, %.1f)", player_pos.x, player_pos.y))
+    -- Force set player position to door center multiple times to ensure it sticks
+    for i = 1, 3 do
+        go.set_position(vmath.vector3(212, 55, 0), "player")
+        player_pos = go.get_position("player")
+        print(string.format("DEBUG MAIN: Player position after forced set attempt %d: (%.1f, %.1f)", i, player_pos.x, player_pos.y))
+    end
     
     -- Spawn zombie at fixed position
     spawn_zombie()

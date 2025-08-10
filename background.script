@@ -1,0 +1,43 @@
+function init(self)
+    print("DEBUG BACKGROUND: Background script initialized")
+    
+    -- Get current sprite info
+    local pos = go.get_position()
+    print(string.format("DEBUG BACKGROUND: Position (%.1f, %.1f, %.1f)", pos.x, pos.y, pos.z))
+    
+    -- Force position to correct location for background  
+    go.set_position(vmath.vector3(480, 320, -0.1))  -- Closer to camera for HTML5
+    pos = go.get_position()
+    print(string.format("DEBUG BACKGROUND: Corrected position to (%.1f, %.1f, %.1f)", pos.x, pos.y, pos.z))
+    
+    -- Try to explicitly set the animation
+    sprite.play_flipbook("#sprite", "screen_1_bg")
+    print("DEBUG BACKGROUND: Attempted to play screen_1_bg animation")
+    
+    -- Check if the sprite has any visible properties
+    local resource = go.get("#sprite", "texture0")
+    print("DEBUG BACKGROUND: Sprite texture resource:", tostring(resource))
+    
+    -- Try to get sprite size
+    local sprite_url = msg.url("#sprite")
+    print("DEBUG BACKGROUND: Trying to get sprite bounds...")
+    -- Note: sprite.get_go_bounds would need to be called from update
+    
+    -- Check if sprite is visible
+    local url = msg.url("#sprite")
+    print("DEBUG BACKGROUND: Sprite URL:", tostring(url))
+end
+
+function update(self, dt)
+    -- Debug output once per second
+    if not self.debug_timer then
+        self.debug_timer = 0
+    end
+    
+    self.debug_timer = self.debug_timer + dt
+    if self.debug_timer > 1.0 then
+        self.debug_timer = 0
+        local pos = go.get_position()
+        print(string.format("DEBUG BACKGROUND: Still alive at (%.1f, %.1f)", pos.x, pos.y))
+    end
+end

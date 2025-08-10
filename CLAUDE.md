@@ -273,6 +273,8 @@ end
 - **Single screen**: Converted from 1920x640 side-scrolling to 960x640 single screen gameplay
 - **Position debugging**: Added debug output to track player positioning issues
 - **Forced positioning**: Main script now forces correct player spawn position to override collection file issues
+- **HTML5 background rendering**: Fixed background not displaying in HTML5 builds by adjusting z-depth from -1.0 to -0.1
+- **Player state reset**: Fixed phantom rightward movement after restart by clearing all input/physics state on enable/disable
 
 #### Current Game Flow ✅
 1. **Start**: Player spawns at door center (212, 55), zombie at far left (50, 56)

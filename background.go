@@ -18,3 +18,7 @@ components {
     z: 1.0
   }
 }
+components {
+  id: "script"
+  component: "/background.script"
+}
