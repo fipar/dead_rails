@@ -150,13 +150,22 @@ end
 
 function on_message(self, message_id, message, sender)
     if message_id == hash("disable_input") then
-        -- Stop movement immediately
+        -- Stop movement immediately and clear all input state
         self.moving = false
+        self.direction_x = 0
+        self.keys_pressed = {}  -- Clear all key states
         sprite.play_flipbook("#sprite", "idle")
         self.current_animation = "idle"
         msg.post(".", "release_input_focus")
     elseif message_id == hash("enable_input") then
-        -- Re-enable input and acquire focus
+        -- Re-enable input and acquire focus with clean state
+        self.moving = false
+        self.direction_x = 0
+        self.keys_pressed = {}  -- Ensure clean key state
+        self.velocity_y = 0     -- Reset vertical velocity
+        self.on_ground = true   -- Reset ground state
+        sprite.play_flipbook("#sprite", "idle")  -- Ensure idle animation
+        self.current_animation = "idle"
         msg.post(".", "acquire_input_focus")
     elseif message_id == hash("set_jump_multiplier") then
         -- Power-up message for future use
