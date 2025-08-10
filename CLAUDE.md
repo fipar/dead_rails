@@ -116,6 +116,13 @@ end
 - **Both**: 30% scale looks good on screen
 - **Frame rates**: Player animations at 8fps, zombie at 6fps
 
+#### Splash Screen System
+- **Implementation**: Collection factory approach
+- **Image**: Custom splash.png (960x640) with "Dead Rails" title and red "Jugar" button
+- **Button detection**: Click coordinates (190-365 x, 380-460 y) 
+- **Transition**: Hides splash, creates main game via factory, transfers input focus
+- **Standalone**: No manual file changes or engine restart needed
+
 ### Game Settings
 - **Resolution**: 960x640
 - **Frame rate**: 60fps with vsync
@@ -129,9 +136,10 @@ end
 
 ### Next Session Goals
 1. **Add game over text display on screen** - Currently only shows in console
-2. **Add screen boundaries** - Prevent player from moving off screen
-3. **Polish animations** - Fine-tune diagonal movement animations
-4. **Add sound effects** - Movement sounds, game over sounds
+2. **Add screen boundaries** - Prevent player from moving off screen  
+3. **Add sound effects** - Movement sounds, game over sounds
+4. **Add scoring system** - Track survival time
+5. **Add multiple zombie difficulty** - More zombies as time progresses
 
 ### Code Snippets for Reference
 
@@ -191,5 +199,5 @@ zombie_pos.y = zombie_pos.y + move_y
 go.set_position(zombie_pos)
 ```
 
-## Status: SMOOTH DIAGONAL MOVEMENT ACHIEVED ✅
-## Next: POLISH GAMEPLAY FEATURES 🎮
+## Status: COMPLETE SPLASH SCREEN + SMOOTH DIAGONAL MOVEMENT ACHIEVED ✅
+## Next: ADD GAMEPLAY FEATURES 🎮
