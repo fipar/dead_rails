@@ -2,7 +2,26 @@ function init(self)
     msg.post(".", "acquire_input_focus")
 end
 
+function start_game(self)
+    -- Hide splash screen
+    go.set("#sprite", "tint.w", 0)
+    
+    -- Create main game collection
+    local props = {}
+    collectionfactory.create("#main_factory", nil, nil, props, 1.0)
+    
+    -- Release input focus
+    msg.post(".", "release_input_focus")
+end
+
 function on_input(self, action_id, action)
+    -- Handle Enter key to start game
+    if action_id == hash("enter") and action.pressed then
+        start_game(self)
+        return
+    end
+    
+    -- Handle clicking on "Jugar" button  
     if action_id == hash("click") and action.pressed then
         -- Get click position
         local click_x = action.x
@@ -23,15 +42,7 @@ function on_input(self, action_id, action)
         -- Check if click is within button bounds
         if world_x >= button_left and world_x <= button_right and 
            world_y >= button_bottom and world_y <= button_top then
-            -- Hide splash screen
-            go.set("#sprite", "tint.w", 0)
-            
-            -- Create main game collection
-            local props = {}
-            collectionfactory.create("#main_factory", nil, nil, props, 1.0)
-            
-            -- Release input focus
-            msg.post(".", "release_input_focus")
+            start_game(self)
         end
     end
 end

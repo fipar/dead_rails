@@ -5,9 +5,9 @@ max_page_width: 0
 max_page_height: 0
 rename_patterns: ""
 animations {
-  id: "overlay"
+  id: "game_over"
   images {
-    image: "down.png"
+    image: "game_over.png"
     sprite_trim_mode: SPRITE_TRIM_MODE_OFF
   }
   playback: PLAYBACK_LOOP_FORWARD

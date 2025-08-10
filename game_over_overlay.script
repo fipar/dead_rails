@@ -2,26 +2,21 @@ function init(self)
     self.visible = false
     -- Start hidden
     go.set_position(vmath.vector3(-1000, -1000, 0))
-    go.set_scale(vmath.vector3(20, 15, 1))  -- Make it big to cover screen
+    go.set_scale(vmath.vector3(1, 1, 1))  -- Normal scale for game over image
     
-    -- Tint it dark for overlay effect
-    sprite.set_constant("#sprite", "tint", vmath.vector4(0.1, 0.1, 0.1, 0.9))
+    -- No tint needed for game over image
+    sprite.set_constant("#sprite", "tint", vmath.vector4(1, 1, 1, 1))
 end
 
 function on_message(self, message_id, message, sender)
     if message_id == hash("show") then
         self.visible = true
-        -- Move to center of screen
+        -- Move to center of screen and show game over image
         go.set_position(vmath.vector3(480, 320, 1))
+        sprite.play_flipbook("#sprite", "game_over")
         
-        -- Display console overlay for now (until we get a proper image) 
-        print("\n\n╔═══════════════════════════════╗")
-        print("║                               ║")  
-        print("║         GAME OVER!            ║")
-        print("║                               ║")
-        print("║     Press R to restart        ║")
-        print("║                               ║")
-        print("╚═══════════════════════════════╝\n")
+        -- Still show console message for backup
+        print("\n--- GAME OVER! Press R to restart ---\n")
         
     elseif message_id == hash("hide") then
         self.visible = false
