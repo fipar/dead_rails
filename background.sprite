@@ -3,7 +3,7 @@ default_animation: "bg_2"
 material: "/builtins/materials/sprite.material"
 blend_mode: BLEND_MODE_ALPHA
 size {
-  x: 1920.0
+  x: 960.0
   y: 640.0
   z: 0.0
   w: 1.0
