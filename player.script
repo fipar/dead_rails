@@ -14,6 +14,12 @@ function init(self)
     self.ground_y = 55          -- Ground level (same as spawn Y)
     self.on_ground = true       -- Whether player is on ground
     
+    -- Screen boundaries (with small margin for sprite size)
+    self.screen_left = 20       -- Left boundary
+    self.screen_right = 940     -- Right boundary (960 - 20)
+    self.screen_bottom = 0      -- Bottom boundary
+    self.screen_top = 640       -- Top boundary
+    
     -- Debug: Print initial position
     local pos = go.get_position()
     print(string.format("DEBUG PLAYER: Initial position in player init: (%.1f, %.1f)", pos.x, pos.y))
@@ -25,9 +31,12 @@ function update(self, dt)
     -- Apply gravity
     self.velocity_y = self.velocity_y + self.gravity * dt
     
-    -- Apply horizontal movement
+    -- Apply horizontal movement with boundary checking
     if self.direction_x ~= 0 then
-        pos.x = pos.x + self.direction_x * self.speed * dt
+        local new_x = pos.x + self.direction_x * self.speed * dt
+        -- Clamp to screen boundaries
+        new_x = math.max(self.screen_left, math.min(self.screen_right, new_x))
+        pos.x = new_x
         self.moving = true
     else
         self.moving = false
@@ -44,6 +53,9 @@ function update(self, dt)
     else
         self.on_ground = false
     end
+    
+    -- Clamp vertical position to screen boundaries
+    pos.y = math.max(self.screen_bottom, math.min(self.screen_top, pos.y))
     
     -- Update position
     go.set_position(pos)

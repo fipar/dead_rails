@@ -18,6 +18,12 @@ function init(self)
     self.stun_timer = 0.0       -- Time remaining in stun
     self.stun_duration = 0.8    -- Stun duration in seconds
     
+    -- Screen boundaries (same as player)
+    self.screen_left = 20       -- Left boundary
+    self.screen_right = 940     -- Right boundary (960 - 20)
+    self.screen_bottom = 0      -- Bottom boundary
+    self.screen_top = 640       -- Top boundary
+    
     -- Find the player object
     self.player_url = msg.url("player")
 end
@@ -67,10 +73,13 @@ function update(self, dt)
         -- Apply gravity
         self.velocity_y = self.velocity_y + self.gravity * dt
         
-        -- Move towards player horizontally only
+        -- Move towards player horizontally only with boundary checking
         if distance > 0 then
             local move_x = (dx / math.abs(dx)) * self.speed * dt  -- Only horizontal direction
-            zombie_pos.x = zombie_pos.x + move_x
+            local new_x = zombie_pos.x + move_x
+            -- Clamp to screen boundaries
+            new_x = math.max(self.screen_left, math.min(self.screen_right, new_x))
+            zombie_pos.x = new_x
         end
         
         -- Apply vertical movement (gravity only)
@@ -84,6 +93,9 @@ function update(self, dt)
         else
             self.on_ground = false
         end
+        
+        -- Clamp vertical position to screen boundaries
+        zombie_pos.y = math.max(self.screen_bottom, math.min(self.screen_top, zombie_pos.y))
         
         go.set_position(zombie_pos)
     end
