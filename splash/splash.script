@@ -1,6 +1,5 @@
 function init(self)
     msg.post(".", "acquire_input_focus")
-    -- Don't load main game until button is clicked
 end
 
 function on_input(self, action_id, action)
@@ -14,36 +13,29 @@ function on_input(self, action_id, action)
         local world_x = click_x
         local world_y = 640 - click_y  -- Convert from top-left to bottom-left
         
-        -- Debug: print click coordinates
-        print("Click at: " .. world_x .. ", " .. world_y)
-        
         -- Define "jugar" button area based on actual click coordinates
-        -- Updated based on corner click testing
+        -- Updated based on corner click testing  
         local button_left = 190
         local button_right = 365  
         local button_bottom = 380
         local button_top = 460
         
-        print("Button area: " .. button_left .. "-" .. button_right .. " x " .. button_bottom .. "-" .. button_top)
-        
         -- Check if click is within button bounds
         if world_x >= button_left and world_x <= button_right and 
            world_y >= button_bottom and world_y <= button_top then
-            print("Button clicked! Loading main game...")
-            -- Load and switch to main game scene
-            msg.post("#main_proxy", "load")
-        else
-            print("Click outside button area")
+            -- Hide splash screen
+            go.set("#sprite", "tint.w", 0)
+            
+            -- Create main game collection
+            local props = {}
+            collectionfactory.create("#main_factory", nil, nil, props, 1.0)
+            
+            -- Release input focus
+            msg.post(".", "release_input_focus")
         end
     end
 end
 
 function on_message(self, message_id, message, sender)
-    if message_id == hash("proxy_loaded") then
-        -- Main collection is loaded, now switch to it
-        msg.post(sender, "init")
-        msg.post(sender, "enable")
-        -- Disable the splash screen
-        msg.post("#", "disable")
-    end
+    -- No message handling needed for exit/restart approach
 end

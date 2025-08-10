@@ -121,7 +121,9 @@ function on_message(self, message_id, message, sender)
         self.moving = false
         sprite.play_flipbook("#sprite", "idle")
         self.current_animation = "idle"
+        msg.post(".", "release_input_focus")
     elseif message_id == hash("enable_input") then
-        -- Re-enable input (movement handled by on_input)
+        -- Re-enable input and acquire focus
+        msg.post(".", "acquire_input_focus")
     end
 end

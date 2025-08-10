@@ -7,7 +7,7 @@ function init(self)
     sprite.play_flipbook("#sprite", "walk")
     
     -- Find the player object
-    self.player_url = msg.url("/player")
+    self.player_url = msg.url("player")
 end
 
 function update(self, dt)
@@ -27,7 +27,7 @@ function update(self, dt)
         
         -- Check if caught the player
         if distance < self.catch_distance then
-            msg.post("/main#script", "game_over")
+            msg.post("main#script", "game_over")
             return
         end
         
