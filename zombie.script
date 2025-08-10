@@ -13,6 +13,11 @@ function init(self)
     self.ground_y = 56          -- Ground level (same as spawn Y)
     self.on_ground = true       -- Whether zombie is on ground
     
+    -- Tactical pause system
+    self.stunned = false        -- Whether zombie is stunned by player jump
+    self.stun_timer = 0.0       -- Time remaining in stun
+    self.stun_duration = 0.8    -- Stun duration in seconds
+    
     -- Find the player object
     self.player_url = msg.url("player")
 end
@@ -21,6 +26,20 @@ function update(self, dt)
     
     if not self.enabled then
         return
+    end
+    
+    -- Handle stun timer
+    if self.stunned then
+        self.stun_timer = self.stun_timer - dt
+        if self.stun_timer <= 0 then
+            self.stunned = false
+            sprite.play_flipbook("#sprite", "walk")  -- Resume walking animation
+            print("DEBUG: Zombie stun ended, resuming chase")
+        else
+            -- Stay stunned, don't move
+            sprite.play_flipbook("#sprite", "idle")  -- Show idle animation while stunned
+            return
+        end
     end
     
     if self.player_url then
@@ -76,6 +95,13 @@ function on_message(self, message_id, message, sender)
         sprite.play_flipbook("#sprite", "idle")
     elseif message_id == hash("enable") then
         self.enabled = true
+        self.stunned = false  -- Clear stun when re-enabling
         sprite.play_flipbook("#sprite", "walk")
+    elseif message_id == hash("player_jumped") then
+        -- Player jumped - stun zombie for tactical advantage
+        self.stunned = true
+        self.stun_timer = self.stun_duration
+        sprite.play_flipbook("#sprite", "idle")  -- Show confused/stunned animation
+        print(string.format("DEBUG: Zombie stunned for %.1f seconds due to player jump", self.stun_duration))
     end
 end

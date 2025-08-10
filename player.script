@@ -9,7 +9,8 @@ function init(self)
     -- Physics properties
     self.velocity_y = 0         -- Vertical velocity
     self.gravity = -800         -- Gravity force (pixels/second^2)
-    self.jump_force = 300       -- Jump initial velocity
+    self.base_jump_force = 450  -- Base jump initial velocity (increased from 300)
+    self.jump_multiplier = 1.0  -- Jump power multiplier (for future power-ups)
     self.ground_y = 55          -- Ground level (same as spawn Y)
     self.on_ground = true       -- Whether player is on ground
     
@@ -55,9 +56,14 @@ function on_input(self, action_id, action)
     -- Handle jumping (up key)
     if action_id == hash("up") then
         if action.pressed and self.on_ground then
-            -- Jump!
-            self.velocity_y = self.jump_force
+            -- Jump! Apply base jump force with multiplier
+            self.velocity_y = self.base_jump_force * self.jump_multiplier
             self.on_ground = false
+            print(string.format("DEBUG: Jump! Force: %.1f (base: %.1f x multiplier: %.2f)", 
+                  self.velocity_y, self.base_jump_force, self.jump_multiplier))
+            
+            -- Notify zombie about player jump (for tactical pause)
+            msg.post("zombie", "player_jumped")
         end
     -- Handle horizontal movement
     elseif action_id == hash("left") then
@@ -115,6 +121,21 @@ function stop_movement(self)
     end
 end
 
+function set_jump_multiplier(self, multiplier)
+    -- Function for future power-up system
+    self.jump_multiplier = multiplier
+    print(string.format("Jump multiplier set to: %.2f", multiplier))
+end
+
+function get_jump_info(self)
+    -- Debug function to check current jump settings
+    return {
+        base_force = self.base_jump_force,
+        multiplier = self.jump_multiplier,
+        effective_force = self.base_jump_force * self.jump_multiplier
+    }
+end
+
 function on_message(self, message_id, message, sender)
     if message_id == hash("disable_input") then
         -- Stop movement immediately
@@ -125,5 +146,8 @@ function on_message(self, message_id, message, sender)
     elseif message_id == hash("enable_input") then
         -- Re-enable input and acquire focus
         msg.post(".", "acquire_input_focus")
+    elseif message_id == hash("set_jump_multiplier") then
+        -- Power-up message for future use
+        set_jump_multiplier(self, message.multiplier or 1.0)
     end
 end
