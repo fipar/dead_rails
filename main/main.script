@@ -1,20 +1,56 @@
 function init(self)
     self.game_over = false
     
+    -- Camera setup for side-scrolling
+    self.camera_offset = vmath.vector3(0, 0, 0)
+    self.world_width = 1920  -- Background width
+    self.screen_width = 960  -- Screen width
+    self.screen_height = 640
+    
     -- Spawn zombie at random position away from player
     spawn_zombie()
 end
 
+function update(self, dt)
+    if not self.game_over then
+        update_camera(self)
+    end
+end
+
+function update_camera(self)
+    -- Get player position
+    local player_pos = go.get_position("player")
+    
+    -- Calculate desired camera position (follow player)
+    local camera_x = player_pos.x - self.screen_width / 2
+    
+    -- Clamp camera to world bounds
+    camera_x = math.max(0, camera_x)  -- Don't scroll past left edge
+    camera_x = math.min(self.world_width - self.screen_width, camera_x)  -- Don't scroll past right edge
+    
+    -- Set camera offset
+    self.camera_offset.x = camera_x
+    
+    -- Update camera position (move all objects relative to camera)
+    msg.post("@render:", "set_view_projection", {
+        view = vmath.matrix4_look_at(
+            vmath.vector3(camera_x + self.screen_width/2, self.screen_height/2, 1),  -- eye
+            vmath.vector3(camera_x + self.screen_width/2, self.screen_height/2, 0),  -- look_at
+            vmath.vector3(0, 1, 0)  -- up
+        )
+    })
+end
+
 function spawn_zombie()
-    local screen_width = 960
-    local screen_height = 640
+    local world_width = 1920  -- World width constant
+    local screen_height = 640  -- Screen height constant
     local player_pos = go.get_position("player")
     local min_distance = 200
     
     local zombie_pos
     repeat
         zombie_pos = vmath.vector3(
-            math.random(100, screen_width - 100),
+            math.random(100, world_width - 100),  -- Use world width instead of screen
             math.random(100, screen_height - 100),
             0
         )

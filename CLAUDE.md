@@ -116,12 +116,20 @@ end
 - **Both**: 30% scale looks good on screen
 - **Frame rates**: Player animations at 8fps, zombie at 6fps
 
-#### Splash Screen System
+#### Splash Screen System ✅
 - **Implementation**: Collection factory approach
 - **Image**: Custom splash.png (960x640) with "Dead Rails" title and red "Jugar" button
 - **Button detection**: Click coordinates (190-365 x, 380-460 y) 
 - **Transition**: Hides splash, creates main game via factory, transfers input focus
 - **Standalone**: No manual file changes or engine restart needed
+
+#### Side-Scrolling System ✅
+- **World Size**: 1920x640 (double screen width for scrolling)
+- **Background**: Custom bg_2.png landscape (wheat fields with sky)
+- **Camera**: Smooth following system that tracks player movement
+- **Boundaries**: Player can move throughout world area, camera clamps at edges
+- **Implementation**: View projection updates with camera position
+- **Zombie spawning**: Uses full world width for spawn locations
 
 ### Game Settings
 - **Resolution**: 960x640
@@ -132,14 +140,25 @@ end
 
 #### Minor Issues
 - Game over text only shows in console, not on screen (overlay shows but no text)
-- No boundaries - player can move off screen
 
-### Next Session Goals
-1. **Add game over text display on screen** - Currently only shows in console
-2. **Add screen boundaries** - Prevent player from moving off screen  
-3. **Add sound effects** - Movement sounds, game over sounds
-4. **Add scoring system** - Track survival time
-5. **Add multiple zombie difficulty** - More zombies as time progresses
+### Platformer/Scroller Conversion Goals
+**Current Status**: Successfully implemented side-scrolling camera system and world boundaries
+
+**Next Phase - Convert to Platformer Game:**
+1. **Add gravity system** - Player falls down unless on platform
+2. **Add platforms/terrain** - Create jumpable platforms in the landscape
+3. **Add jumping mechanics** - Spacebar/up arrow for jumping with physics
+4. **Add collision system** - Platform collision detection and response  
+5. **Redesign zombie AI** - Make zombies follow platform rules or fly
+6. **Add level progression** - Multiple areas or increasing difficulty
+7. **Add collectibles** - Items to collect while avoiding zombies
+
+**Polish Features (after platformer mechanics):**
+1. **Add game over text display** - On-screen text instead of console
+2. **Add sound effects** - Jump, landing, zombie sounds
+3. **Add scoring system** - Points for survival time and collectibles
+4. **Add particle effects** - Dust clouds, death effects
+5. **Add power-ups** - Temporary speed boost, invincibility, etc.
 
 ### Code Snippets for Reference
 
@@ -199,5 +218,30 @@ zombie_pos.y = zombie_pos.y + move_y
 go.set_position(zombie_pos)
 ```
 
-## Status: COMPLETE SPLASH SCREEN + SMOOTH DIAGONAL MOVEMENT ACHIEVED ✅
-## Next: ADD GAMEPLAY FEATURES 🎮
+#### Side-Scrolling Camera System (WORKING)
+```lua
+-- Camera following system in main.script
+function update_camera(self)
+    -- Get player position
+    local player_pos = go.get_position("player")
+    
+    -- Calculate desired camera position (follow player)
+    local camera_x = player_pos.x - self.screen_width / 2
+    
+    -- Clamp camera to world bounds
+    camera_x = math.max(0, camera_x)  -- Don't scroll past left edge
+    camera_x = math.min(self.world_width - self.screen_width, camera_x)  -- Don't scroll past right edge
+    
+    -- Update camera position
+    msg.post("@render:", "set_view_projection", {
+        view = vmath.matrix4_look_at(
+            vmath.vector3(camera_x + self.screen_width/2, self.screen_height/2, 1),
+            vmath.vector3(camera_x + self.screen_width/2, self.screen_height/2, 0),
+            vmath.vector3(0, 1, 0)
+        )
+    })
+end
+```
+
+## Status: SIDE-SCROLLING ZOMBIE CHASE GAME COMPLETE ✅
+## Next: CONVERT TO PLATFORMER MECHANICS 🏃‍♂️
