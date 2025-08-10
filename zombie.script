@@ -7,6 +7,12 @@ function init(self)
     self.debug_printed = false
     sprite.play_flipbook("#sprite", "walk")
     
+    -- Physics properties (same as player)
+    self.velocity_y = 0         -- Vertical velocity
+    self.gravity = -800         -- Gravity force (pixels/second^2)  
+    self.ground_y = 56          -- Ground level (same as spawn Y)
+    self.on_ground = true       -- Whether zombie is on ground
+    
     -- Find the player object
     self.player_url = msg.url("player")
 end
@@ -39,16 +45,28 @@ function update(self, dt)
             return
         end
         
-        -- Move towards player
+        -- Apply gravity
+        self.velocity_y = self.velocity_y + self.gravity * dt
+        
+        -- Move towards player horizontally only
         if distance > 0 then
-            local move_x = (dx / distance) * self.speed * dt
-            local move_y = (dy / distance) * self.speed * dt
-            
+            local move_x = (dx / math.abs(dx)) * self.speed * dt  -- Only horizontal direction
             zombie_pos.x = zombie_pos.x + move_x
-            zombie_pos.y = zombie_pos.y + move_y
-            
-            go.set_position(zombie_pos)
         end
+        
+        -- Apply vertical movement (gravity only)
+        zombie_pos.y = zombie_pos.y + self.velocity_y * dt
+        
+        -- Ground collision
+        if zombie_pos.y <= self.ground_y then
+            zombie_pos.y = self.ground_y
+            self.velocity_y = 0
+            self.on_ground = true
+        else
+            self.on_ground = false
+        end
+        
+        go.set_position(zombie_pos)
     end
 end
 
