@@ -1,9 +1,13 @@
 function init(self)
     self.game_over = false
+    self.stage_complete = false
     
     -- Single screen platformer setup
     self.screen_width = 960  -- Screen width
     self.screen_height = 640
+    
+    -- Stage completion boundary
+    self.completion_x = 937
     
     -- Debug: Check initial player position
     local player_pos = go.get_position("player")
@@ -23,13 +27,43 @@ function init(self)
 end
 
 function update(self, dt)
-    -- No camera updates needed for single screen platformer
+    -- Check for stage completion
+    if not self.game_over and not self.stage_complete then
+        local player_pos = go.get_position("player")
+        if player_pos.x > self.completion_x then
+            stage_complete(self)
+        end
+    end
 end
 
 function spawn_zombie()
     -- Spawn zombie at fixed position on far left, same height as player
     local zombie_pos = vmath.vector3(50, 56, 0)
     go.set_position(zombie_pos, "zombie")
+end
+
+function stage_complete(self)
+    self.stage_complete = true
+    
+    -- Stop zombie movement
+    msg.post("zombie", "disable")
+    
+    -- Disable player input  
+    msg.post("player", "disable_input")
+    
+    -- Display stage completion message
+    print("\n\n╔═══════════════════════════════╗")
+    print("║                               ║")  
+    print("║      STAGE COMPLETE!          ║")
+    print("║                               ║")
+    print("║   You made it to the exit!    ║")
+    print("║                               ║")
+    print("║     Press R to restart        ║")
+    print("║                               ║")
+    print("╚═══════════════════════════════╝\n")
+    
+    -- Take input focus for restart
+    msg.post(".", "acquire_input_focus")
 end
 
 function on_message(self, message_id, message, sender)
@@ -53,15 +87,19 @@ function on_message(self, message_id, message, sender)
 end
 
 function on_input(self, action_id, action)
-    if self.game_over and action_id == hash("restart") and action.pressed then
-        -- Restart game
+    -- Handle restart from both game over and stage completion
+    if (self.game_over or self.stage_complete) and action_id == hash("restart") and action.pressed then
+        -- Reset game state
         self.game_over = false
+        self.stage_complete = false
         
         -- Enable zombie movement
         msg.post("zombie", "enable")
         
-        -- Hide game over overlay
-        msg.post("game_over", "hide")
+        -- Hide game over overlay (if it was shown)
+        if self.game_over then
+            msg.post("game_over", "hide")
+        end
         
         -- Enable player input
         msg.post("player", "enable_input")
@@ -69,10 +107,12 @@ function on_input(self, action_id, action)
         -- Release input focus
         msg.post(".", "release_input_focus")
         
-        -- Reset player position to door center (adjusted for coordinate system)
+        -- Reset player position to door center
         go.set_position(vmath.vector3(212, 55, 0), "player")
         
         -- Respawn zombie
         spawn_zombie()
+        
+        print("\n--- Game Restarted! ---\n")
     end
 end
