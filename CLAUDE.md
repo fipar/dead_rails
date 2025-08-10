@@ -14,18 +14,18 @@ A simple zombie chase game built in Defold 1.10.0 for learning purposes. Player 
 function update(self, dt)
     if self.moving and (self.direction_x ~= 0 or self.direction_y ~= 0) then
         local pos = go.get_position()
-        
+
         -- Calculate distance for normalization (like zombie does)
         local distance = math.sqrt(self.direction_x * self.direction_x + self.direction_y * self.direction_y)
-        
+
         -- Move using normalized vector (like zombie approach)
         if distance > 0 then
             local move_x = (self.direction_x / distance) * self.speed * dt
             local move_y = (self.direction_y / distance) * self.speed * dt
-            
+
             pos.x = pos.x + move_x
             pos.y = pos.y + move_y
-            
+
             go.set_position(pos)
         end
     end
@@ -34,7 +34,7 @@ end
 
 #### Diagonal Movement Solution:
 **Key insight**: The zombie's vector math approach works perfectly for player movement too! The solution uses:
-- Multi-key tracking with `keys_pressed` table ✅ 
+- Multi-key tracking with `keys_pressed` table ✅
 - Vector math with speed normalization ✅
 - Direction vectors (-1, 0, 1) for each axis ✅
 - Smart animation selection based on primary movement direction ✅
@@ -75,7 +75,7 @@ end
 ├── player.script               # Player movement logic (SMOOTH)
 ├── Player.sprite               # Player sprite component
 ├── player.atlas                # Player animations (left, right, up, down, idle)
-├── Zombie.go                   # Zombie game object  
+├── Zombie.go                   # Zombie game object
 ├── zombie.script               # Zombie AI chase logic
 ├── Zombie.sprite               # Zombie sprite component
 ├── zombie.atlas                # Zombie animations (walk, idle)
@@ -99,7 +99,7 @@ end
 
 **Working approach**: Vector math with proper implementation:
 1. **Multi-key tracking** - Track all pressed keys in `keys_pressed` table
-2. **Direction vectors** - Convert keys to -1/0/1 direction values  
+2. **Direction vectors** - Convert keys to -1/0/1 direction values
 3. **Speed normalization** - Use `math.sqrt()` and division like zombie
 4. **Smart animations** - Choose animation based on primary movement direction
 
@@ -119,7 +119,7 @@ end
 #### Splash Screen System ✅
 - **Implementation**: Collection factory approach
 - **Image**: Custom splash.png (960x640) with "Dead Rails" title and red "Jugar" button
-- **Button detection**: Click coordinates (190-365 x, 380-460 y) 
+- **Button detection**: Click coordinates (190-365 x, 380-460 y)
 - **Transition**: Hides splash, creates main game via factory, transfers input focus
 - **Standalone**: No manual file changes or engine restart needed
 
@@ -144,14 +144,19 @@ end
 ### Platformer/Scroller Conversion Goals
 **Current Status**: Successfully implemented side-scrolling camera system and world boundaries
 
-**Next Phase - Convert to Platformer Game:**
-1. **Add gravity system** - Player falls down unless on platform
-2. **Add platforms/terrain** - Create jumpable platforms in the landscape
-3. **Add jumping mechanics** - Spacebar/up arrow for jumping with physics
-4. **Add collision system** - Platform collision detection and response  
-5. **Redesign zombie AI** - Make zombies follow platform rules or fly
-6. **Add level progression** - Multiple areas or increasing difficulty
-7. **Add collectibles** - Items to collect while avoiding zombies
+**Next Phase - Convert to Platformer Game (TO DO LIST):**
+1. **Add gravity system** - Player falls down unless on platform ⏳
+2. **Add platforms/terrain** - Create jumpable platforms in the landscape ⏳
+3. **Add jumping mechanics** - Spacebar/up arrow for jumping with physics ⏳
+4. **Add collision system** - Platform collision detection and response ⏳
+5. **Redesign zombie AI** - Make zombies follow platform rules or fly ⏳
+6. **Add level progression** - Multiple areas or increasing difficulty ⏳
+7. **Add collectibles** - Items to collect while avoiding zombies ⏳
+
+**Preparation Tasks:**
+- **Convert backgrounds to match game screen size (960x640)** - ✅ COMPLETED
+- **Update spawn positions - Player at door center, zombie at far left** - ✅ COMPLETED
+- **Add stage completion trigger - Player reaches right edge to win** - ✅ COMPLETED
 
 **Polish Features (after platformer mechanics):**
 1. **Add game over text display** - On-screen text instead of console
@@ -165,7 +170,7 @@ end
 #### Smooth Diagonal Movement Input System (WORKING)
 ```lua
 -- Input handling with multi-key support
-function on_input(self, action_id, action)    
+function on_input(self, action_id, action)
     if action_id == hash("up") then
         if action.pressed then
             self.keys_pressed["up"] = true
@@ -174,7 +179,7 @@ function on_input(self, action_id, action)
         end
     -- ... similar for down, left, right
     end
-    
+
     update_movement(self)
 end
 
@@ -182,12 +187,12 @@ function update_movement(self)
     -- Calculate direction vector based on pressed keys
     self.direction_x = 0
     self.direction_y = 0
-    
+
     if self.keys_pressed["up"] then self.direction_y = 1 end
     if self.keys_pressed["down"] then self.direction_y = -1 end
     if self.keys_pressed["left"] then self.direction_x = -1 end
     if self.keys_pressed["right"] then self.direction_x = 1 end
-    
+
     -- Set movement and animation based on direction
     if self.direction_x ~= 0 or self.direction_y ~= 0 then
         self.moving = true
@@ -224,14 +229,14 @@ go.set_position(zombie_pos)
 function update_camera(self)
     -- Get player position
     local player_pos = go.get_position("player")
-    
+
     -- Calculate desired camera position (follow player)
     local camera_x = player_pos.x - self.screen_width / 2
-    
+
     -- Clamp camera to world bounds
     camera_x = math.max(0, camera_x)  -- Don't scroll past left edge
     camera_x = math.min(self.world_width - self.screen_width, camera_x)  -- Don't scroll past right edge
-    
+
     -- Update camera position
     msg.post("@render:", "set_view_projection", {
         view = vmath.matrix4_look_at(
@@ -243,5 +248,49 @@ function update_camera(self)
 end
 ```
 
-## Status: SIDE-SCROLLING ZOMBIE CHASE GAME COMPLETE ✅
+## Status: SINGLE-SCREEN ZOMBIE ESCAPE GAME COMPLETE ✅
 ## Next: CONVERT TO PLATFORMER MECHANICS 🏃‍♂️
+
+### Recent Updates (Current Session)
+
+#### Background and Spawn Position Updates ✅
+- **Background images**: Converted HEIC files to PNG and resized to 960x640 to match game screen
+- **Player spawn**: Fixed to door center at coordinates (212, 55) using forced positioning in main script
+- **Zombie spawn**: Fixed to far left at coordinates (50, 56) at same height as player
+- **Debug system**: Added coordinate debugging to identify actual vs expected spawn positions
+
+#### Stage Completion System ✅
+- **Win condition**: Player reaches X coordinate > 937 (right edge of screen) to complete stage
+- **Stage complete behavior**:
+  - Stops zombie movement
+  - Disables player input
+  - Shows "STAGE COMPLETE!" message in console
+  - Allows restart with 'R' key
+- **Game states**: Now supports both win (stage complete) and lose (caught by zombie) conditions
+
+#### Technical Fixes ✅
+- **Camera system**: Removed problematic side-scrolling camera causing console errors
+- **Single screen**: Converted from 1920x640 side-scrolling to 960x640 single screen gameplay
+- **Position debugging**: Added debug output to track player positioning issues
+- **Forced positioning**: Main script now forces correct player spawn position to override collection file issues
+
+#### Current Game Flow ✅
+1. **Start**: Player spawns at door center (212, 55), zombie at far left (50, 56)
+2. **Gameplay**: Player moves to avoid zombie while heading toward right edge
+3. **Win**: Reach X > 937 for "STAGE COMPLETE!" message
+4. **Lose**: Get caught by zombie (within 30 pixels) for "GAME OVER!" message
+5. **Restart**: Press 'R' from either win or lose state to restart
+
+#### File Structure Updates
+```
+/Users/fernandoipar/Dead Rails/
+├── main/
+│   ├── main.collection         # Updated spawn positions
+│   └── main.script             # Added stage completion system, fixed positioning
+├── player.script               # Added position debugging
+├── zombie.script               # Added position debugging
+├── background.sprite           # Resized to 960x640
+├── bg_1.png, bg_2.png, main_bg.png  # Converted from HEIC and resized
+└── input/
+    └── game.input_binding      # Maintained existing controls
+```
