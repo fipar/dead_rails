@@ -6,44 +6,48 @@ A simple zombie chase game built in Defold 1.10.0 for learning purposes. Player 
 ## Current Working State
 
 ### Player Movement System
-**IMPORTANT DISCOVERY**: We found that **single-direction movement is perfectly smooth**, but **diagonal movement introduces jerkiness**.
+**BREAKTHROUGH**: We successfully implemented smooth diagonal movement using vector math with speed normalization!
 
-#### Working Smooth Movement (Current):
+#### Working Smooth Diagonal Movement (Current):
 ```lua
--- In player.script - SMOOTH VERSION
+-- In player.script - SMOOTH DIAGONAL VERSION
 function update(self, dt)
-    if self.moving then
+    if self.moving and (self.direction_x ~= 0 or self.direction_y ~= 0) then
         local pos = go.get_position()
-        if self.current_animation == "up" then
-            pos.y = pos.y + self.speed * dt
-        elseif self.current_animation == "down" then
-            pos.y = pos.y - self.speed * dt
-        elseif self.current_animation == "left" then
-            pos.x = pos.x - self.speed * dt
-        elseif self.current_animation == "right" then
-            pos.x = pos.x + self.speed * dt
+        
+        -- Calculate distance for normalization (like zombie does)
+        local distance = math.sqrt(self.direction_x * self.direction_x + self.direction_y * self.direction_y)
+        
+        -- Move using normalized vector (like zombie approach)
+        if distance > 0 then
+            local move_x = (self.direction_x / distance) * self.speed * dt
+            local move_y = (self.direction_y / distance) * self.speed * dt
+            
+            pos.x = pos.x + move_x
+            pos.y = pos.y + move_y
+            
+            go.set_position(pos)
         end
-        go.set_position(pos)
     end
 end
 ```
 
-#### Problematic Diagonal Movement:
-Any approach that allows multiple keys to affect movement simultaneously causes jerkiness:
-- Multi-key tracking with `keys_pressed` table
-- Velocity-based systems
-- Vector math approaches
-- Acceleration/deceleration systems
+#### Diagonal Movement Solution:
+**Key insight**: The zombie's vector math approach works perfectly for player movement too! The solution uses:
+- Multi-key tracking with `keys_pressed` table ✅ 
+- Vector math with speed normalization ✅
+- Direction vectors (-1, 0, 1) for each axis ✅
+- Smart animation selection based on primary movement direction ✅
 
 ### Game Components
 
 #### Player (`Player.go` + `player.script`)
 - **Speed**: 120 pixels/second (2x faster than zombie)
-- **Movement**: Simple directional movement (one direction at a time)
+- **Movement**: Smooth vector-based movement with diagonal support
 - **Animation**: Uses player.atlas with left/left-2, right/right-2, up, down images
 - **Scale**: 30% of original size
-- **Input**: Arrow keys + WASD
-- **Smooth**: ✅ Works perfectly in single directions
+- **Input**: Arrow keys + WASD (supports key combinations)
+- **Smooth**: ✅ Works perfectly in all directions including diagonals
 
 #### Zombie (`Zombie.go` + `zombie.script`)
 - **Speed**: 60 pixels/second
@@ -90,22 +94,21 @@ Any approach that allows multiple keys to affect movement simultaneously causes 
 
 ### Technical Discoveries
 
-#### Movement Smoothness Investigation
-We tried multiple approaches to achieve smooth diagonal movement:
+#### Movement Smoothness Solution ✅
+**SOLVED**: Diagonal movement achieved using vector math with speed normalization!
 
-1. **Multi-key velocity system** - Jerky
-2. **Acceleration/deceleration** - Jerky  
-3. **Vector math (zombie approach)** - Jerky
-4. **Target-based movement** - Jerky
-5. **Simple continuous velocity** - Jerky
+**Working approach**: Vector math with proper implementation:
+1. **Multi-key tracking** - Track all pressed keys in `keys_pressed` table
+2. **Direction vectors** - Convert keys to -1/0/1 direction values  
+3. **Speed normalization** - Use `math.sqrt()` and division like zombie
+4. **Smart animations** - Choose animation based on primary movement direction
 
-**Root Cause**: Unknown, but isolated to diagonal movement code. Single-direction movement using the original simple approach is perfectly smooth.
+**Previous failed attempts** were likely due to improper implementation details, not the fundamental approach.
 
 #### Speed Tuning
 - **Original**: Player 850 speed - smooth but too fast
-- **Problem**: Lowering speed to reasonable levels introduced jerkiness
-- **Solution**: Found that jerkiness was from diagonal code, not speed
-- **Current**: Player 120, Zombie 60 - good balance when using single-direction movement
+- **Previous problem**: Lowering speed with old diagonal code introduced jerkiness
+- **Current**: Player 120, Zombie 60 - perfect balance with new vector math movement
 
 #### Animation System
 - **Player**: Uses atlas with separate left/right animations (left.png + left-2.png, etc.)
@@ -120,42 +123,55 @@ We tried multiple approaches to achieve smooth diagonal movement:
 
 ### Known Issues
 
-#### Critical Issue: Diagonal Movement Jerkiness
-- **Status**: Unresolved
-- **Impact**: Player can only move in single directions smoothly
-- **Workaround**: Currently using single-direction movement only
-- **Next Steps**: Need to investigate why diagonal code causes jerkiness when single-direction is smooth
-
 #### Minor Issues
 - Game over text only shows in console, not on screen (overlay shows but no text)
 - No boundaries - player can move off screen
 
 ### Next Session Goals
-1. **Investigate diagonal movement jerkiness** - try to understand why single-direction is smooth but multi-key isn't
-2. **Possible approaches to try**:
-   - Physics-based movement system
-   - Different input polling method
-   - Frame-rate independent movement calculations
-   - Defold-specific movement patterns
+1. **Add game over text display on screen** - Currently only shows in console
+2. **Add screen boundaries** - Prevent player from moving off screen
+3. **Polish animations** - Fine-tune diagonal movement animations
+4. **Add sound effects** - Movement sounds, game over sounds
 
 ### Code Snippets for Reference
 
-#### Smooth Single-Direction Movement (WORKING)
+#### Smooth Diagonal Movement Input System (WORKING)
 ```lua
--- This works perfectly smooth
-function update(self, dt)
-    if self.moving then
-        local pos = go.get_position()
-        if self.current_animation == "up" then
-            pos.y = pos.y + self.speed * dt
-        elseif self.current_animation == "down" then
-            pos.y = pos.y - self.speed * dt
-        elseif self.current_animation == "left" then
-            pos.x = pos.x - self.speed * dt
-        elseif self.current_animation == "right" then
-            pos.x = pos.x + self.speed * dt
+-- Input handling with multi-key support
+function on_input(self, action_id, action)    
+    if action_id == hash("up") then
+        if action.pressed then
+            self.keys_pressed["up"] = true
+        elseif action.released then
+            self.keys_pressed["up"] = false
         end
-        go.set_position(pos)
+    -- ... similar for down, left, right
+    end
+    
+    update_movement(self)
+end
+
+function update_movement(self)
+    -- Calculate direction vector based on pressed keys
+    self.direction_x = 0
+    self.direction_y = 0
+    
+    if self.keys_pressed["up"] then self.direction_y = 1 end
+    if self.keys_pressed["down"] then self.direction_y = -1 end
+    if self.keys_pressed["left"] then self.direction_x = -1 end
+    if self.keys_pressed["right"] then self.direction_x = 1 end
+    
+    -- Set movement and animation based on direction
+    if self.direction_x ~= 0 or self.direction_y ~= 0 then
+        self.moving = true
+        -- Smart animation selection based on primary direction
+        if math.abs(self.direction_x) > math.abs(self.direction_y) then
+            play_animation(self, self.direction_x > 0 and "right" or "left")
+        else
+            play_animation(self, self.direction_y > 0 and "up" or "down")
+        end
+    else
+        stop_movement(self)
     end
 end
 ```
@@ -175,5 +191,5 @@ zombie_pos.y = zombie_pos.y + move_y
 go.set_position(zombie_pos)
 ```
 
-## Status: SMOOTH SINGLE-DIRECTION MOVEMENT ACHIEVED ✅
-## Next: INVESTIGATE DIAGONAL MOVEMENT JERKINESS ⚠️
+## Status: SMOOTH DIAGONAL MOVEMENT ACHIEVED ✅
+## Next: POLISH GAMEPLAY FEATURES 🎮
