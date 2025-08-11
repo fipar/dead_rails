@@ -121,6 +121,8 @@ function handle_level2_phases(self, dt)
         -- Phase 2: Moving train - move train and player together
         if self.train_moving then
             move_train_and_player(self, dt)
+        else
+            print("DEBUG: Level2 Phase 2 but train not moving!")
         end
     elseif self.level2_phase == 3 then
         -- Phase 3: Arrival - handle victory condition
@@ -130,23 +132,32 @@ end
 
 function check_player_on_train(self)
     local player_pos = go.get_position("player")
-    local train_pos = go.get_position("train")
     
-    -- Check if player is on train (within train bounds and above it)
-    local train_left = train_pos.x - 214 / 2  -- Train width / 2
-    local train_right = train_pos.x + 214 / 2
-    local train_top = train_pos.y + 165 / 2   -- Train height / 2
+    -- Check if player is on the train_platform (simpler approach)
+    -- Find the train_platform from our platform definitions
+    for _, platform in ipairs(self.level2_platforms) do
+        if platform.name == "train_platform" then
+            -- Check if player is standing on train platform
+            local player_width = 216 * 0.3
+            local player_left = player_pos.x - player_width / 2
+            local player_right = player_pos.x + player_width / 2
+            
+            -- Check horizontal overlap with train platform
+            local horizontal_overlap = player_right > platform.x1 and player_left < platform.x2
+            -- Check if player is on the platform (within small margin)
+            local on_platform = math.abs(player_pos.y - (platform.y + 50)) < 15
+            
+            -- Debug output
+            if horizontal_overlap and on_platform then
+                print(string.format("🚂 PLAYER ON TRAIN PLATFORM: (%.1f,%.1f) - Starting train departure!", 
+                      player_pos.x, player_pos.y))
+                return true
+            end
+            break
+        end
+    end
     
-    -- Player collision box
-    local player_width = 216 * 0.3  -- Player scaled width
-    local player_left = player_pos.x - player_width / 2
-    local player_right = player_pos.x + player_width / 2
-    
-    -- Check horizontal overlap and vertical proximity
-    local horizontal_overlap = player_right > train_left and player_left < train_right
-    local on_train_top = math.abs(player_pos.y - (train_top + 50)) < 10  -- Player standing on train
-    
-    return horizontal_overlap and on_train_top
+    return false
 end
 
 function start_phase2(self)
@@ -168,11 +179,12 @@ function move_train_and_player(self, dt)
     train_pos.x = train_pos.x + self.train_speed * dt
     go.set_position(train_pos, "train")
     
-    -- Move player with train (if still on train)
-    if check_player_on_train(self) then
-        player_pos.x = player_pos.x + self.train_speed * dt
-        go.set_position(player_pos, "player")
-    end
+    -- Always move player with train during Phase 2 (attached to train)
+    player_pos.x = player_pos.x + self.train_speed * dt
+    go.set_position(player_pos, "player")
+    
+    print(string.format("🚂 MOVING: Train at (%.1f,%.1f), Player at (%.1f,%.1f)", 
+          train_pos.x, train_pos.y, player_pos.x, player_pos.y))
     
     -- Check if train reached target position (right edge)
     if train_pos.x >= self.train_target_x then
