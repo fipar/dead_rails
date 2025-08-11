@@ -25,7 +25,8 @@ function init(self)
         {x1 = 41, x2 = 180, y = 250, name = "platform1"},
         {x1 = 41, x2 = 180, y = 136, name = "platform2"}, 
         {x1 = 310, x2 = 508, y = 136, name = "platform3"},
-        {x1 = 228, x2 = 290, y = 88, name = "platform4"}
+        {x1 = 228, x2 = 290, y = 88, name = "platform4"},
+        {x1 = 110, x2 = 140, y = 316, name = "train_platform"}
     }
     
     -- Player sprite dimensions (scaled to 30%)
