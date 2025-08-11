@@ -1,6 +1,8 @@
 function init(self)
     self.game_over = false
     self.stage_complete = false
+    self.level = 1  -- Current level (1 or 2)
+    self.debug_mode = false  -- Debug coordinate mode
     
     -- Single screen platformer setup
     self.screen_width = 960  -- Screen width
@@ -8,6 +10,12 @@ function init(self)
     
     -- Stage completion boundary
     self.completion_x = 937
+    
+    -- Screen blink variables for level transition
+    self.blink_timer = 0
+    self.blink_count = 0
+    self.blink_duration = 0.1  -- Each blink lasts 0.1 seconds
+    self.total_blinks = 6      -- 3 full blinks (on/off cycles)
     
     -- Debug: Check initial player position
     local player_pos = go.get_position("player")
@@ -29,8 +37,29 @@ function init(self)
 end
 
 function update(self, dt)
-    -- Check for stage completion
-    if not self.game_over and not self.stage_complete then
+    -- Handle screen blink transition to level 2
+    if self.stage_complete and self.level == 1 and self.blink_count < self.total_blinks then
+        self.blink_timer = self.blink_timer + dt
+        if self.blink_timer >= self.blink_duration then
+            self.blink_timer = 0
+            self.blink_count = self.blink_count + 1
+            
+            -- Toggle screen overlay (simulate blink)
+            if self.blink_count % 2 == 1 then
+                -- Show dark overlay
+                msg.post("game_over", "show")  -- Reuse game over overlay for blink
+            else
+                -- Hide dark overlay  
+                msg.post("game_over", "hide")
+            end
+            
+            -- After all blinks, transition to level 2
+            if self.blink_count >= self.total_blinks then
+                start_level_2(self)
+            end
+        end
+    -- Normal gameplay - check for stage completion
+    elseif not self.game_over and not self.stage_complete then
         local player_pos = go.get_position("player")
         if player_pos.x > self.completion_x then
             stage_complete(self)
@@ -44,6 +73,36 @@ function spawn_zombie()
     go.set_position(zombie_pos, "zombie")
 end
 
+function start_level_2(self)
+    print("\n--- STARTING LEVEL 2! ---\n")
+    
+    -- Update game state
+    self.level = 2
+    self.stage_complete = false
+    self.debug_mode = true  -- Auto-enable debug mode for level 2
+    
+    -- Change background to level 2
+    msg.post("background#sprite", "play_animation", {id = hash("screen_2_bg")})
+    
+    -- Reset player to starting position (might need different coords for level 2)
+    go.set_position(vmath.vector3(212, 55, 0), "player")
+    
+    -- Respawn zombie
+    spawn_zombie()
+    
+    -- Enable player input
+    msg.post("player", "enable_input")
+    
+    -- Enable zombie movement
+    msg.post("zombie", "enable")
+    
+    -- Take input focus for debug mode
+    msg.post(".", "acquire_input_focus")
+    
+    print("DEBUG MODE ACTIVATED: Click anywhere to see coordinates")
+    print("Level 2 loaded with screen_2_bg.png background")
+end
+
 function stage_complete(self)
     self.stage_complete = true
     
@@ -53,19 +112,27 @@ function stage_complete(self)
     -- Disable player input  
     msg.post("player", "disable_input")
     
-    -- Display stage completion message
-    print("\n\n╔═══════════════════════════════╗")
-    print("║                               ║")  
-    print("║      STAGE COMPLETE!          ║")
-    print("║                               ║")
-    print("║   You made it to the exit!    ║")
-    print("║                               ║")
-    print("║     Press R to restart        ║")
-    print("║                               ║")
-    print("╚═══════════════════════════════╝\n")
-    
-    -- Take input focus for restart
-    msg.post(".", "acquire_input_focus")
+    if self.level == 1 then
+        -- Level 1 complete - start level 2 transition
+        print("\n--- LEVEL 1 COMPLETE! Transitioning to Level 2... ---\n")
+        self.blink_timer = 0
+        self.blink_count = 0
+        -- Blinking will be handled in update()
+    else
+        -- Level 2 complete - game finished!
+        print("\n\n╔═══════════════════════════════╗")
+        print("║                               ║")  
+        print("║       GAME COMPLETE!          ║")
+        print("║                               ║")
+        print("║   You beat both levels!       ║")
+        print("║                               ║")
+        print("║     Press R to restart        ║")
+        print("║                               ║")
+        print("╚═══════════════════════════════╝\n")
+        
+        -- Take input focus for restart
+        msg.post(".", "acquire_input_focus")
+    end
 end
 
 function on_message(self, message_id, message, sender)
@@ -91,21 +158,32 @@ function on_message(self, message_id, message, sender)
 end
 
 function on_input(self, action_id, action)
+    -- Handle debug mode coordinate clicking (level 2)
+    if self.debug_mode and action_id == hash("click") and action.pressed then
+        print(string.format("DEBUG LEVEL 2: Clicked at coordinates (%.0f, %.0f)", action.x, action.y))
+        return true
+    end
+    
     -- Debug: Log all input during game over / stage complete
     if (self.game_over or self.stage_complete) then
         print(string.format("DEBUG MAIN INPUT: action_id=%s, pressed=%s, game_over=%s, stage_complete=%s", 
               tostring(action_id), tostring(action.pressed), tostring(self.game_over), tostring(self.stage_complete)))
     end
     
-    -- Handle restart from both game over and stage completion
-    if (self.game_over or self.stage_complete) and action_id == hash("restart") and action.pressed then
+    -- Handle restart from both game over and stage completion (only if level 2 complete or game over)
+    if ((self.game_over) or (self.stage_complete and self.level == 2)) and action_id == hash("restart") and action.pressed then
         -- Store current states before resetting
         local was_game_over = self.game_over
         local was_stage_complete = self.stage_complete
         
-        -- Reset game state
+        -- Reset game state to level 1
         self.game_over = false
         self.stage_complete = false
+        self.level = 1
+        self.debug_mode = false
+        
+        -- Reset background to level 1
+        msg.post("background#sprite", "play_animation", {id = hash("screen_1_bg")})
         
         -- Enable zombie movement
         msg.post("zombie", "enable")
@@ -127,6 +205,6 @@ function on_input(self, action_id, action)
         -- Respawn zombie
         spawn_zombie()
         
-        print("\n--- Game Restarted! ---\n")
+        print("\n--- Game Restarted to Level 1! ---\n")
     end
 end
