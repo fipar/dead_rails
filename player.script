@@ -20,6 +20,23 @@ function init(self)
     self.screen_bottom = 0      -- Bottom boundary
     self.screen_top = 640       -- Top boundary
     
+    -- Platform definitions (level 2)
+    self.platforms = {
+        {x1 = 41, x2 = 180, y = 250, name = "platform1"},
+        {x1 = 41, x2 = 180, y = 136, name = "platform2"}, 
+        {x1 = 310, x2 = 508, y = 136, name = "platform3"},
+        {x1 = 228, x2 = 290, y = 88, name = "platform4"}
+    }
+    
+    -- Player sprite dimensions (scaled to 30%)
+    self.player_width = 216 * 0.3   -- About 65 pixels
+    self.player_height = 330 * 0.3  -- About 99 pixels
+    
+    -- Jump debug tracking
+    self.jump_started = false
+    self.jump_max_y = 0
+    self.jump_start_pos = vmath.vector3()
+    
     -- Debug: Print initial position
     local pos = go.get_position()
     print(string.format("DEBUG PLAYER: Initial position in player init: (%.1f, %.1f)", pos.x, pos.y))
@@ -27,6 +44,23 @@ end
 
 function update(self, dt)
     local pos = go.get_position()
+    
+    -- Jump debug tracking
+    if self.velocity_y > 0 and not self.jump_started then
+        -- Jump just started
+        self.jump_started = true
+        self.jump_max_y = pos.y
+        self.jump_start_pos = vmath.vector3(pos)
+        print(string.format("🚀 JUMP STARTED from (%.1f, %.1f)", pos.x, pos.y))
+    elseif self.jump_started and self.velocity_y > 0 then
+        -- Tracking jump height
+        self.jump_max_y = math.max(self.jump_max_y, pos.y)
+    elseif self.jump_started and self.velocity_y <= 0 and self.on_ground then
+        -- Jump ended (landed)
+        print(string.format("🎯 JUMP MAX: Player reached (%.1f, %.1f) - Height gained: %.1f pixels", 
+              pos.x, self.jump_max_y, self.jump_max_y - self.jump_start_pos.y))
+        self.jump_started = false
+    end
     
     -- Apply gravity
     self.velocity_y = self.velocity_y + self.gravity * dt
@@ -45,13 +79,21 @@ function update(self, dt)
     -- Apply vertical movement (gravity/jumping)
     pos.y = pos.y + self.velocity_y * dt
     
-    -- Ground collision
-    if pos.y <= self.ground_y then
-        pos.y = self.ground_y
+    -- Check platform and ground collisions
+    local collision_y = check_platform_collision(self, pos)
+    if collision_y then
+        pos.y = collision_y
         self.velocity_y = 0
         self.on_ground = true
     else
-        self.on_ground = false
+        -- Ground collision as fallback
+        if pos.y <= self.ground_y then
+            pos.y = self.ground_y
+            self.velocity_y = 0
+            self.on_ground = true
+        else
+            self.on_ground = false
+        end
     end
     
     -- Clamp vertical position to screen boundaries
@@ -62,6 +104,50 @@ function update(self, dt)
     
     -- Update animation based on movement
     update_animation(self)
+end
+
+function check_platform_collision(self, pos)
+    -- Check if player is falling (velocity <= 0 means falling or on surface)
+    if self.velocity_y > 0 then
+        return nil  -- Player is jumping up, no platform collision
+    end
+    
+    -- Player collision box (center-based)
+    local player_left = pos.x - self.player_width / 2
+    local player_right = pos.x + self.player_width / 2
+    local player_bottom = pos.y - self.player_height / 2
+    
+    -- Check regular platforms
+    for _, platform in ipairs(self.platforms) do
+        -- Check horizontal overlap
+        if player_right > platform.x1 and player_left < platform.x2 then
+            -- Check if player is landing on platform (within small margin)
+            if player_bottom <= platform.y + 5 and player_bottom >= platform.y - 5 then
+                print(string.format("Platform collision: %s at y=%.1f", platform.name, platform.y))
+                return platform.y + self.player_height / 2  -- Position player on top of platform
+            end
+        end
+    end
+    
+    -- Check train platform collision
+    local train_pos = go.get_position("train")
+    if train_pos.x > -500 then  -- Train is visible (not hidden offscreen)
+        -- Train dimensions (214×165)
+        local train_left = train_pos.x - 214 / 2
+        local train_right = train_pos.x + 214 / 2
+        local train_top = train_pos.y + 165 / 2
+        
+        -- Check horizontal overlap with train
+        if player_right > train_left and player_left < train_right then
+            -- Check if player is landing on train top
+            if player_bottom <= train_top + 5 and player_bottom >= train_top - 5 then
+                print(string.format("Train platform collision at y=%.1f", train_top))
+                return train_top + self.player_height / 2  -- Position player on top of train
+            end
+        end
+    end
+    
+    return nil  -- No platform collision
 end
 
 function on_input(self, action_id, action)    
