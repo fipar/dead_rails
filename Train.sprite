@@ -1,10 +1,10 @@
-tile_set: "/train.atlas"
 default_animation: "train"
 material: "/builtins/materials/sprite.material"
-blend_mode: BLEND_MODE_ALPHA
 size {
   x: 214.0
   y: 165.0
-  z: 0.0
-  w: 1.0
+}
+textures {
+  sampler: "texture_sampler"
+  texture: "/train.atlas"
 }
