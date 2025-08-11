@@ -20,14 +20,8 @@ function init(self)
     self.screen_bottom = 0      -- Bottom boundary
     self.screen_top = 640       -- Top boundary
     
-    -- Platform definitions (level 2)
-    self.platforms = {
-        {x1 = 41, x2 = 180, y = 250, name = "platform1"},
-        {x1 = 41, x2 = 180, y = 136, name = "platform2"}, 
-        {x1 = 310, x2 = 508, y = 136, name = "platform3"},
-        {x1 = 228, x2 = 290, y = 88, name = "platform4"},
-        {x1 = 110, x2 = 140, y = 316, name = "train_platform"}
-    }
+    -- Platform definitions (will be set by main script for level 2)
+    self.platforms = {}
     
     -- Player sprite dimensions (scaled to 30%)
     self.player_width = 216 * 0.3   -- About 65 pixels
@@ -249,6 +243,10 @@ function on_message(self, message_id, message, sender)
         sprite.play_flipbook("#sprite", "idle")
         self.current_animation = "idle"
         msg.post(".", "release_input_focus")
+    elseif message_id == hash("set_platforms") then
+        -- Receive platform definitions from main script
+        self.platforms = message.platforms
+        print(string.format("Player received %d platform definitions", #self.platforms))
     elseif message_id == hash("enable_input") then
         -- Re-enable input and acquire focus with clean state
         self.moving = false

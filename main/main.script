@@ -1,11 +1,31 @@
 -- ZOMBIE CONTROL: Change pause_zombie to true to stop zombie movement for debugging
 -- This allows clicking around without being chased
+
+-- =============================================================================
+-- PLATFORM DEFINITIONS - LEVEL 2
+-- Change platform coordinates here for easy adjustment
+-- =============================================================================
+local LEVEL2_PLATFORMS = {
+    {x1 = 41, x2 = 180, y = 250, name = "platform1"},
+    {x1 = 41, x2 = 180, y = 136, name = "platform2"}, 
+    {x1 = 310, x2 = 508, y = 136, name = "platform3"},
+    {x1 = 228, x2 = 290, y = 88, name = "platform4"},
+    {x1 = 40, x2 = 230, y = 330, name = "train_platform"}  -- Platform for boarding train
+}
+
+-- Train coordinates
+local TRAIN_POSITION = {x = 132, y = 391, z = 0}
+
 function init(self)
     self.game_over = false
     self.stage_complete = false
     self.level = 1  -- Current level (1 or 2)
     self.debug_mode = false  -- Debug coordinate mode
     self.pause_zombie = false  -- Control zombie movement (set to true to pause zombie)
+    
+    -- Store platform definitions for access by other scripts
+    self.level2_platforms = LEVEL2_PLATFORMS
+    self.train_position = TRAIN_POSITION
     
     -- Level 2 phase system
     self.level2_phase = 1  -- 1=platforms, 2=moving_train, 3=arrival
@@ -193,12 +213,16 @@ function start_level_2(self)
     msg.post("zombie", "disable")
     
     -- Create train at specified coordinates
-    go.set_position(vmath.vector3(132, 316, 0), "train")
+    go.set_position(vmath.vector3(self.train_position.x, self.train_position.y, self.train_position.z), "train")
+    
+    -- Send platform definitions to player script
+    msg.post("player", "set_platforms", {platforms = self.level2_platforms})
     
     -- Enable player input for movement
     msg.post("player", "enable_input")
     
-    print("Level 2: No zombies initially, train positioned at (132, 316)")
+    print(string.format("Level 2: No zombies initially, train positioned at (%.0f, %.0f)", 
+          self.train_position.x, self.train_position.y))
     
     -- Hide game over overlay completely (used for screen blink effect)
     msg.post("game_over", "hide")
