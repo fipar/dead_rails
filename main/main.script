@@ -34,6 +34,9 @@ function init(self)
     -- Spawn zombie at fixed position
     spawn_zombie()
     
+    -- Hide train initially (level 1 has no train)
+    go.set_position(vmath.vector3(-1000, -1000, 0), "train")
+    
     -- Debug: Check player position after spawn_zombie
     player_pos = go.get_position("player")
     print(string.format("DEBUG MAIN: Player position after spawn_zombie: (%.1f, %.1f)", player_pos.x, player_pos.y))
@@ -87,24 +90,20 @@ function start_level_2(self)
     -- Change background to level 2
     msg.post("background#sprite", "play_animation", {id = hash("screen_2_bg")})
     
-    -- Player and zombie are already active, just reposition them
-    -- Reset player to starting position for level 2 (same position for now)
+    -- Reset player to same starting position as level 1
     go.set_position(vmath.vector3(212, 55, 0), "player")
     
-    -- Reset zombie position 
-    go.set_position(vmath.vector3(50, 56, 0), "zombie")
+    -- Hide zombie completely for level 2 start (no zombies initially)
+    go.set_position(vmath.vector3(-1000, -1000, 0), "zombie")  -- Move offscreen
+    msg.post("zombie", "disable")
     
-    -- Disable player input during debug mode so clicks go to main script
-    msg.post("player", "disable_input")
+    -- Create train at specified coordinates
+    go.set_position(vmath.vector3(132, 391, 0), "train")
     
-    -- Control zombie movement based on pause_zombie variable
-    if self.pause_zombie then
-        msg.post("zombie", "disable")
-        print("Zombie movement PAUSED for debugging")
-    else
-        msg.post("zombie", "enable")
-        print("Zombie movement ENABLED")
-    end
+    -- Enable player input for movement
+    msg.post("player", "enable_input")
+    
+    print("Level 2: No zombies initially, train positioned at (132, 391)")
     
     -- Hide game over overlay completely (used for screen blink effect)
     msg.post("game_over", "hide")
@@ -119,6 +118,7 @@ function start_level_2(self)
     print("Level 2 loaded with screen_2_bg.png background")
     print("Player position:", go.get_position("player"))
     print("Zombie position:", go.get_position("zombie"))
+    print("Train position:", go.get_position("train"))
 end
 
 function stage_complete(self)
@@ -182,16 +182,16 @@ function on_input(self, action_id, action)
               tostring(action_id), tostring(action.pressed), tostring(self.debug_mode), self.level))
     end
     
-    -- Handle debug mode coordinate clicking (level 2)
+    -- Handle debug mode coordinate clicking (level 2) - don't consume input so player can still move
     if self.debug_mode and action_id == hash("click") and action.pressed then
         print(string.format("🎯 DEBUG LEVEL 2: Clicked at coordinates (%.0f, %.0f)", action.x, action.y))
-        return true
+        -- Don't return true - let input pass through to player
     end
     
     -- Handle debug mode coordinate clicking with touch action too (fallback)
     if self.debug_mode and action_id == hash("touch") and action.pressed then
         print(string.format("🎯 DEBUG LEVEL 2 (touch): Clicked at coordinates (%.0f, %.0f)", action.x, action.y))
-        return true
+        -- Don't return true - let input pass through to player  
     end
     
     -- Debug: Log all input during game over / stage complete
@@ -238,6 +238,9 @@ function on_input(self, action_id, action)
         
         -- Reset player position to door center
         go.set_position(vmath.vector3(212, 55, 0), "player")
+        
+        -- Hide train (level 1 has no train)
+        go.set_position(vmath.vector3(-1000, -1000, 0), "train")
         
         -- Respawn zombie
         spawn_zombie()
