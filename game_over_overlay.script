@@ -18,6 +18,15 @@ function on_message(self, message_id, message, sender)
         -- Still show console message for backup
         print("\n--- GAME OVER! Press R to restart ---\n")
         
+    elseif message_id == hash("show_victory") then
+        self.visible = true
+        -- Move to center of screen and show victory image
+        go.set_position(vmath.vector3(480, 320, 1))
+        sprite.play_flipbook("#sprite", "you_win")
+        
+        -- Show victory message
+        print("\n🎉--- YOU WIN! Press R to restart ---🎉\n")
+        
     elseif message_id == hash("hide") then
         self.visible = false
         -- Move off screen

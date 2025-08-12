@@ -165,6 +165,9 @@ function start_phase2(self)
     self.level2_phase = 2
     self.train_moving = true
     
+    -- Switch to desert rail background for Phase 2
+    msg.post("background#sprite", "play_animation", {id = hash("screen_3_bg")})
+    
     -- Store player's offset relative to train for attachment
     local player_pos = go.get_position("player")
     local train_pos = go.get_position("train")
@@ -179,6 +182,7 @@ function start_phase2(self)
     -- Tell player script to enter "train mode" (disable gravity, enable relative movement)
     msg.post("player", "enter_train_mode")
     
+    print("Background switched to desert rails (screen_3_bg)")
     print(string.format("Train is now moving toward the desert... Player offset: (%.1f, %.1f)", 
           self.player_train_offset.x, self.player_train_offset.y))
 end
@@ -216,9 +220,16 @@ function start_phase3(self)
     -- Exit train mode - restore player physics
     msg.post("player", "exit_train_mode")
     
-    -- For now, just complete the level
+    -- Show victory screen
+    msg.post("game_over", "show_victory")
+    
+    -- Complete the level
     self.stage_complete = true
-    print("LEVEL 2 COMPLETE! Great job surviving the journey!")
+    
+    -- Take input focus for restart
+    msg.post(".", "acquire_input_focus")
+    
+    print("🎉 LEVEL 2 COMPLETE! Great job surviving the journey!")
 end
 
 function start_level_2(self)
