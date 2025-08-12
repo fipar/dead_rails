@@ -277,11 +277,31 @@ end
 - ✅ **Platform Physics**: Player can successfully jump between platforms and land correctly
 - ✅ **Debug Tracking**: Added jump max height logging for platform positioning fine-tuning
 
-### Tomorrow's Tasks 📋
-1. **Platform Fine-tuning**: Use coordinate clicking to adjust platform positions for optimal gameplay
-2. **Train Positioning**: Lower train platform or increase jump height so it's reachable
-3. **Level 2 Zombie Integration**: Design zombie roles and behavior for the platformer level
-4. **Zombie Mechanics**: Determine if zombies should climb platforms, fly, or have different movement rules
+### Level 2 Three-Phase Design Plan 🚂
+
+**PHASE 1: Static Platformer** (Current - ✅ Working)
+- Player navigates 4 platforms to reach train at (132, 391)
+- Current screen_2_bg.png background with platform jumping mechanics
+- **Transition**: Player collision with train triggers Phase 2
+
+**PHASE 2: Moving Train Defense** (In Development)
+- Train moves right at constant speed until reaching right edge of screen
+- New featureless desert background (rails + sand + sky)
+- Train positioned near left edge, environmental objects move right-to-left
+- Zombie spawning system, combat mechanics, distance tracking
+- **Transition**: Train reaches right edge triggers Phase 3
+
+**PHASE 3: Arrival & Victory** (Planned)
+- New train station background showing destination
+- Train arrival animation (slowing, stopping)
+- Victory condition: "LEVEL 2 COMPLETE!" message
+- Return to main menu or advance to next level
+
+### Current Tasks 📋
+1. ✅ **Phase 1 Complete**: Platform system working, train positioned
+2. 🚧 **Phase 1→2 Transition**: Implement train movement when player reaches train
+3. ⏳ **Phase 2 Backgrounds**: Create desert rail background and station background
+4. ⏳ **Phase 2 Mechanics**: Moving objects system, zombie spawning, combat
 
 ### Recent Updates (Current Session)
 

@@ -14,7 +14,7 @@ local LEVEL2_PLATFORMS = {
 }
 
 -- Train coordinates
-local TRAIN_POSITION = {x = 132, y = 391, z = 0}
+local TRAIN_POSITION = {x = 132, y = 391, z = -0.05}
 
 function init(self)
     self.game_over = false
@@ -186,15 +186,16 @@ end
 function move_train_and_player(self, dt)
     local train_pos = go.get_position("train")
     
-    -- Move train to the right
+    -- Move train to the right (maintain Z-depth)
     train_pos.x = train_pos.x + self.train_speed * dt
+    train_pos.z = self.train_position.z  -- Ensure correct Z-depth
     go.set_position(train_pos, "train")
     
     -- Update player position relative to train (player follows train)
     local new_player_pos = vmath.vector3(
         train_pos.x + self.player_train_offset.x,
         train_pos.y + self.player_train_offset.y,
-        0
+        0.0  -- Player stays at Z=0 (in front of train at Z=-0.05)
     )
     go.set_position(new_player_pos, "player")
     
