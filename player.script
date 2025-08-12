@@ -32,6 +32,9 @@ function init(self)
     self.jump_max_y = 0
     self.jump_start_pos = vmath.vector3()
     
+    -- Train mode (when player is attached to moving train)
+    self.train_mode = false
+    
     -- Debug: Print initial position
     local pos = go.get_position()
     print(string.format("DEBUG PLAYER: Initial position in player init: (%.1f, %.1f)", pos.x, pos.y))
@@ -57,8 +60,13 @@ function update(self, dt)
         self.jump_started = false
     end
     
-    -- Apply gravity
-    self.velocity_y = self.velocity_y + self.gravity * dt
+    -- Apply gravity (unless in train mode)
+    if not self.train_mode then
+        self.velocity_y = self.velocity_y + self.gravity * dt
+    else
+        -- In train mode: no gravity, no vertical movement
+        self.velocity_y = 0
+    end
     
     -- Apply horizontal movement with boundary checking
     if self.direction_x ~= 0 then
@@ -71,31 +79,46 @@ function update(self, dt)
         self.moving = false
     end
     
-    -- Apply vertical movement (gravity/jumping)
-    pos.y = pos.y + self.velocity_y * dt
-    
-    -- Check platform and ground collisions
-    local collision_y = check_platform_collision(self, pos)
-    if collision_y then
-        pos.y = collision_y
-        self.velocity_y = 0
-        self.on_ground = true
-    else
-        -- Ground collision as fallback
-        if pos.y <= self.ground_y then
-            pos.y = self.ground_y
+    -- Apply vertical movement and collisions (unless in train mode)
+    if not self.train_mode then
+        -- Apply vertical movement (gravity/jumping)
+        pos.y = pos.y + self.velocity_y * dt
+        
+        -- Check platform and ground collisions
+        local collision_y = check_platform_collision(self, pos)
+        if collision_y then
+            pos.y = collision_y
             self.velocity_y = 0
             self.on_ground = true
         else
-            self.on_ground = false
+            -- Ground collision as fallback
+            if pos.y <= self.ground_y then
+                pos.y = self.ground_y
+                self.velocity_y = 0
+                self.on_ground = true
+            else
+                self.on_ground = false
+            end
         end
+    else
+        -- In train mode: position is controlled by main script, always "on ground"
+        self.on_ground = true
     end
     
-    -- Clamp vertical position to screen boundaries
-    pos.y = math.max(self.screen_bottom, math.min(self.screen_top, pos.y))
-    
-    -- Update position
-    go.set_position(pos)
+    -- Update position (only if not in train mode)
+    if not self.train_mode then
+        -- Clamp vertical position to screen boundaries
+        pos.y = math.max(self.screen_bottom, math.min(self.screen_top, pos.y))
+        go.set_position(pos)
+    else
+        -- In train mode: only apply horizontal movement relative to train
+        -- Main script controls overall position, we just allow local movement
+        local current_pos = go.get_position()
+        if self.direction_x ~= 0 then
+            current_pos.x = current_pos.x + self.direction_x * self.speed * dt
+            go.set_position(current_pos)
+        end
+    end
     
     -- Update animation based on movement
     update_animation(self)
@@ -247,6 +270,16 @@ function on_message(self, message_id, message, sender)
         -- Receive platform definitions from main script
         self.platforms = message.platforms
         print(string.format("Player received %d platform definitions", #self.platforms))
+    elseif message_id == hash("enter_train_mode") then
+        -- Enter train mode - disable gravity and platform collision
+        self.train_mode = true
+        self.velocity_y = 0  -- Stop any vertical movement
+        self.on_ground = true  -- Always considered on ground in train mode
+        print("🚂 PLAYER: Entered train mode - gravity disabled, following train")
+    elseif message_id == hash("exit_train_mode") then
+        -- Exit train mode - restore normal physics
+        self.train_mode = false
+        print("🚂 PLAYER: Exited train mode - normal physics restored")
     elseif message_id == hash("enable_input") then
         -- Re-enable input and acquire focus with clean state
         self.moving = false
@@ -254,6 +287,7 @@ function on_message(self, message_id, message, sender)
         self.keys_pressed = {}  -- Ensure clean key state
         self.velocity_y = 0     -- Reset vertical velocity
         self.on_ground = true   -- Reset ground state
+        self.train_mode = false -- Reset train mode
         sprite.play_flipbook("#sprite", "idle")  -- Ensure idle animation
         self.current_animation = "idle"
         

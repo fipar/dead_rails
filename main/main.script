@@ -165,26 +165,41 @@ function start_phase2(self)
     self.level2_phase = 2
     self.train_moving = true
     
+    -- Store player's offset relative to train for attachment
+    local player_pos = go.get_position("player")
+    local train_pos = go.get_position("train")
+    self.player_train_offset = {
+        x = player_pos.x - train_pos.x,
+        y = player_pos.y - train_pos.y
+    }
+    
     -- Disable debug mode during train movement
     self.debug_mode = false
     
-    print("Train is now moving toward the desert...")
+    -- Tell player script to enter "train mode" (disable gravity, enable relative movement)
+    msg.post("player", "enter_train_mode")
+    
+    print(string.format("Train is now moving toward the desert... Player offset: (%.1f, %.1f)", 
+          self.player_train_offset.x, self.player_train_offset.y))
 end
 
 function move_train_and_player(self, dt)
     local train_pos = go.get_position("train")
-    local player_pos = go.get_position("player")
     
     -- Move train to the right
     train_pos.x = train_pos.x + self.train_speed * dt
     go.set_position(train_pos, "train")
     
-    -- Always move player with train during Phase 2 (attached to train)
-    player_pos.x = player_pos.x + self.train_speed * dt
-    go.set_position(player_pos, "player")
+    -- Update player position relative to train (player follows train)
+    local new_player_pos = vmath.vector3(
+        train_pos.x + self.player_train_offset.x,
+        train_pos.y + self.player_train_offset.y,
+        0
+    )
+    go.set_position(new_player_pos, "player")
     
     print(string.format("🚂 MOVING: Train at (%.1f,%.1f), Player at (%.1f,%.1f)", 
-          train_pos.x, train_pos.y, player_pos.x, player_pos.y))
+          train_pos.x, train_pos.y, new_player_pos.x, new_player_pos.y))
     
     -- Check if train reached target position (right edge)
     if train_pos.x >= self.train_target_x then
@@ -196,6 +211,9 @@ function start_phase3(self)
     print("\n🏁 PHASE 3: TRAIN ARRIVAL! You've reached the desert station!")
     self.level2_phase = 3
     self.train_moving = false
+    
+    -- Exit train mode - restore player physics
+    msg.post("player", "exit_train_mode")
     
     -- For now, just complete the level
     self.stage_complete = true
