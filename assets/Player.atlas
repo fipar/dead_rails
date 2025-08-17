@@ -1,0 +1,41 @@
+animations {
+  id: "Idle"
+  images {
+    image: "/assets/images/down.png"
+  }
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "walk_right"
+  images {
+    image: "/assets/images/left-2.png"
+  }
+  images {
+    image: "/assets/images/left.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+}
+animations {
+  id: "walk_left"
+  images {
+    image: "/assets/images/right-2.png"
+  }
+  images {
+    image: "/assets/images/right.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+}
+animations {
+  id: "Jump"
+  images {
+    image: "/assets/images/up.png"
+  }
+  images {
+    image: "/assets/images/down.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+}
+extrude_borders: 2

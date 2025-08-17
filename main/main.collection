@@ -1,0 +1,41 @@
+name: "main"
+scale_along_z: 0
+embedded_instances {
+  id: "Player"
+  data: "components {\n"
+  "  id: \"Player1\"\n"
+  "  component: \"/main/Player.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"Player\"\n"
+  "  type: \"sprite\"\n"
+  "  data: \"default_animation: \\\"Idle\\\"\\n"
+  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
+  "textures {\\n"
+  "  sampler: \\\"texture_sampler\\\"\\n"
+  "  texture: \\\"/assets/Player.atlas\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 17.0
+    y: 32.0
+  }
+  scale3 {
+    x: 0.1
+    y: 0.1
+    z: 0.2
+  }
+}
+embedded_instances {
+  id: "Level 2"
+  data: "components {\n"
+  "  id: \"Level 2\"\n"
+  "  component: \"/assets/Level 2.tilemap\"\n"
+  "}\n"
+  ""
+  position {
+    z: -1.0
+  }
+}
