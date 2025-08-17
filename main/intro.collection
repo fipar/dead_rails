@@ -1,0 +1,22 @@
+name: "intro"
+scale_along_z: 0
+embedded_instances {
+  id: "Controller"
+  data: "components {\n"
+  "  id: \"controller\"\n"
+  "  component: \"/main/controller.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"mainproxy\"\n"
+  "  type: \"collectionproxy\"\n"
+  "  data: \"collection: \\\"/levels/main.collection\\\"\\n"
+  "\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"splashproxy\"\n"
+  "  type: \"collectionproxy\"\n"
+  "  data: \"collection: \\\"/splash/Splash.collection\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+}

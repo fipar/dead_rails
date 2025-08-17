@@ -4,7 +4,7 @@ embedded_instances {
   id: "Player"
   data: "components {\n"
   "  id: \"Player1\"\n"
-  "  component: \"/main/Player.script\"\n"
+  "  component: \"/levels/Player.script\"\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"Player\"\n"
@@ -38,4 +38,8 @@ embedded_instances {
   position {
     z: -1.0
   }
+}
+embedded_instances {
+  id: "Level 1"
+  data: ""
 }
