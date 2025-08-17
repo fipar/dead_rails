@@ -1,1 +1,1 @@
-A POC game based on a story by my son, to get familiar with Defold and test Claude Code a bit.
+A POC game based on a story by my son, to get familiar with Defold. 
