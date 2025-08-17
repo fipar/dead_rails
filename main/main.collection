@@ -9,7 +9,7 @@ embedded_instances {
   "embedded_components {\n"
   "  id: \"Player\"\n"
   "  type: \"sprite\"\n"
-  "  data: \"default_animation: \\\"Idle\\\"\\n"
+  "  data: \"default_animation: \\\"idle\\\"\\n"
   "material: \\\"/builtins/materials/sprite.material\\\"\\n"
   "textures {\\n"
   "  sampler: \\\"texture_sampler\\\"\\n"

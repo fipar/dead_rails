@@ -32,22 +32,22 @@ function on_message(self, message_id, message, sender)
 	-- Remove this function if not needed
 end
 
+function handle_flipbook_animation(action, pressed_flipbook, released_flipbook)
+	if action.pressed then
+		sprite.play_flipbook("#Player", pressed_flipbook)
+	elseif action.released then
+		sprite.play_flipbook("#Player", released_flipbook)
+	end
+end
+
 function on_input(self, action_id, action)
 	local position = go.get_position()
 	
 	if action_id == hash("right") then
-		if action.pressed then
-			sprite.play_flipbook("#Player", "walk_right")
-		elseif action.released then
-			sprite.play_flipbook("#Player", "idle")
-		end		
+		handle_flipbook_animation(action, "walk_right", "idle")
 		position.x = position.x + 1
 	elseif action_id == hash("left") then
-		if action.pressed then
-			sprite.play_flipbook("#Player", "walk_left")
-		elseif action.released then
-			sprite.play_flipbook("#Player", "idle")
-		end		
+		handle_flipbook_animation(action, "walk_left", "idle")
 		position.x = position.x - 1
 	end
 

@@ -1,5 +1,5 @@
 animations {
-  id: "Idle"
+  id: "idle"
   images {
     image: "/assets/images/down.png"
   }
@@ -28,7 +28,7 @@ animations {
   fps: 8
 }
 animations {
-  id: "Jump"
+  id: "jump"
   images {
     image: "/assets/images/up.png"
   }
