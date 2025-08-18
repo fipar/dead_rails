@@ -31,6 +31,9 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("proxy_loaded") then
 		msg.post(sender, "enable")
+	elseif message_id == hash("proceed_to_levels") then
+		msg.post("#splashproxy", "disable")
+		msg.post("#mainproxy", "async_load")
 	end
 	-- Add message-handling code here
 	-- Learn more: https://defold.com/manuals/message-passing/
