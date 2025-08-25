@@ -5,9 +5,9 @@ max_page_width: 0
 max_page_height: 0
 rename_patterns: ""
 animations {
-  id: "screen_1_bg"
+  id: "cactus1"
   images {
-    image: "/screen_1_bg.png"
+    image: "cactus1.png"
     sprite_trim_mode: SPRITE_TRIM_MODE_OFF
   }
   playback: PLAYBACK_LOOP_FORWARD
@@ -16,9 +16,9 @@ animations {
   flip_vertical: 0
 }
 animations {
-  id: "screen_2_bg"
+  id: "cactus2"
   images {
-    image: "/screen_2_bg.png"
+    image: "cactus2.png"
     sprite_trim_mode: SPRITE_TRIM_MODE_OFF
   }
   playback: PLAYBACK_LOOP_FORWARD
@@ -27,9 +27,9 @@ animations {
   flip_vertical: 0
 }
 animations {
-  id: "screen_3_bg"
+  id: "cactus3"
   images {
-    image: "/screen_3_bg.png"
+    image: "cactus3.png"
     sprite_trim_mode: SPRITE_TRIM_MODE_OFF
   }
   playback: PLAYBACK_LOOP_FORWARD
@@ -38,9 +38,9 @@ animations {
   flip_vertical: 0
 }
 animations {
-  id: "screen_3_bg_blank"
+  id: "cactus4"
   images {
-    image: "/screen_3_bg_blank.png"
+    image: "cactus4.png"
     sprite_trim_mode: SPRITE_TRIM_MODE_OFF
   }
   playback: PLAYBACK_LOOP_FORWARD

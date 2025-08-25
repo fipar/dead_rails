@@ -106,6 +106,14 @@ embedded_instances {
   "  id: \"script\"\n"
   "  component: \"/main/main.script\"\n"
   "}\n"
+  "components {\n"
+  "  id: \"cactus_factory\"\n"
+  "  component: \"/main/cactus_factory.factory\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"zombie_factory\"\n"
+  "  component: \"/main/zombie_factory.factory\"\n"
+  "}\n"
   ""
   position {
     x: 0.0

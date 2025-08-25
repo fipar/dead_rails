@@ -28,10 +28,19 @@ function init(self)
     self.train_position = TRAIN_POSITION
     
     -- Level 2 phase system
-    self.level2_phase = 1  -- 1=platforms, 2=moving_train, 3=arrival
+    self.level2_phase = 1  -- 1=platforms, 2=moving_train, 3=desert_objects, 4=victory
     self.train_moving = false  -- Is train currently moving
     self.train_speed = 70  -- Train movement speed (pixels/second)
     self.train_target_x = 1100  -- Train stops when reaching this X coordinate
+    
+    -- Phase 3 (desert objects) variables
+    self.desert_phase_timer = 0  -- Timer for 30-second desert phase
+    self.desert_phase_duration = 30  -- 30 seconds of desert phase
+    self.cactus_spawn_timer = 0  -- Timer for spawning cacti
+    self.cactus_spawn_interval = 2  -- Spawn cactus every 2 seconds
+    self.zombie_spawn_timer = 0  -- Timer for spawning zombies
+    self.zombie_spawn_interval = 3  -- Spawn zombie every 3 seconds
+    self.spawned_objects = {}  -- Table to track spawned object IDs for cleanup
     
     -- Single screen platformer setup
     self.screen_width = 960  -- Screen width
@@ -125,8 +134,11 @@ function handle_level2_phases(self, dt)
             print("DEBUG: Level2 Phase 2 but train not moving!")
         end
     elseif self.level2_phase == 3 then
-        -- Phase 3: Arrival - handle victory condition
-        -- TODO: Implement arrival phase
+        -- Phase 3: Desert objects - moving cacti and zombies
+        handle_desert_phase(self, dt)
+    elseif self.level2_phase == 4 then
+        -- Phase 4: Victory - game complete
+        -- Victory handled in start_phase4()
     end
 end
 
@@ -206,16 +218,127 @@ function move_train_and_player(self, dt)
     print(string.format("🚂 MOVING: Train at (%.1f,%.1f), Player at (%.1f,%.1f)", 
           train_pos.x, train_pos.y, new_player_pos.x, new_player_pos.y))
     
-    -- Check if train reached target position (right edge)
+    -- Check if train reached target position (exits screen)
     if train_pos.x >= self.train_target_x then
-        start_phase3(self)
+        start_desert_phase(self)
     end
 end
 
-function start_phase3(self)
-    print("\n🏁 PHASE 3: TRAIN ARRIVAL! You've reached the desert station!")
+function start_desert_phase(self)
+    print("\n🌵 PHASE 3: DESERT JOURNEY! Watch out for moving obstacles!")
     self.level2_phase = 3
-    self.train_moving = false
+    self.train_moving = false  -- Train stops moving, disappears off screen
+    
+    -- Switch to blank desert background
+    msg.post("background#sprite", "play_animation", {id = hash("screen_3_bg_blank")})
+    
+    -- Reset desert phase timer
+    self.desert_phase_timer = 0
+    self.cactus_spawn_timer = 0
+    self.zombie_spawn_timer = 0
+    
+    -- Clear any existing spawned objects
+    cleanup_spawned_objects(self)
+    self.spawned_objects = {}
+    
+    -- Keep player in train mode (no gravity, can move around screen)
+    -- Player stays where they were on the train
+    
+    print("Background switched to blank desert (screen_3_bg_blank)")
+    print("Starting 30-second desert obstacle phase...")
+end
+
+function handle_desert_phase(self, dt)
+    -- Update phase timer
+    self.desert_phase_timer = self.desert_phase_timer + dt
+    
+    -- Update spawn timers
+    self.cactus_spawn_timer = self.cactus_spawn_timer + dt
+    self.zombie_spawn_timer = self.zombie_spawn_timer + dt
+    
+    -- Spawn cacti
+    if self.cactus_spawn_timer >= self.cactus_spawn_interval then
+        spawn_moving_cactus(self)
+        self.cactus_spawn_timer = 0
+    end
+    
+    -- Spawn zombies  
+    if self.zombie_spawn_timer >= self.zombie_spawn_interval then
+        spawn_moving_zombie(self)
+        self.zombie_spawn_timer = 0
+    end
+    
+    -- Objects update themselves, no need to manage them here
+    
+    -- Check if desert phase is complete
+    if self.desert_phase_timer >= self.desert_phase_duration then
+        start_phase4(self)
+    end
+end
+
+function spawn_moving_cactus(self)
+    -- Choose random cactus sprite (1-4)
+    local cactus_num = math.random(1, 4)
+    local cactus_type = "cactus" .. cactus_num
+    
+    -- Spawn at random Y position (not at rails level - rails are around Y=320)
+    local rails_y = 320
+    local margin = 50
+    local spawn_y
+    
+    if math.random() < 0.5 then
+        -- Spawn above rails
+        spawn_y = math.random(rails_y + margin, self.screen_height - 50)
+    else
+        -- Spawn below rails
+        spawn_y = math.random(50, rails_y - margin)
+    end
+    
+    -- Spawn cactus using factory
+    local spawn_pos = vmath.vector3(self.screen_width + 50, spawn_y, 0)
+    local props = {speed = 100}  -- Movement speed property
+    local cactus_id = factory.create("#cactus_factory", spawn_pos, nil, props)
+    
+    -- Tell the cactus which sprite to use
+    msg.post(cactus_id, "set_cactus_type", {cactus_type = cactus_type})
+    
+    -- Track spawned object for cleanup
+    table.insert(self.spawned_objects, cactus_id)
+    
+    print(string.format("🌵 Spawned %s at (%.0f, %.0f)", cactus_type, spawn_pos.x, spawn_pos.y))
+end
+
+function spawn_moving_zombie(self)
+    -- Spawn zombie at rails level (middle of screen)
+    local rails_y = 320
+    
+    -- Spawn zombie using factory
+    local spawn_pos = vmath.vector3(self.screen_width + 50, rails_y, 0)
+    local props = {speed = 80}  -- Movement speed property
+    local zombie_id = factory.create("#zombie_factory", spawn_pos, nil, props)
+    
+    -- Track spawned object for cleanup
+    table.insert(self.spawned_objects, zombie_id)
+    
+    print(string.format("🧟 Spawned zombie at (%.0f, %.0f) - rails level", spawn_pos.x, spawn_pos.y))
+end
+
+function cleanup_spawned_objects(self)
+    -- Clean up any remaining spawned objects
+    for i = #self.spawned_objects, 1, -1 do
+        local obj_id = self.spawned_objects[i]
+        go.delete(obj_id, true)  -- Delete immediately
+        table.remove(self.spawned_objects, i)
+    end
+    print("Cleaned up all spawned desert objects")
+end
+
+function start_phase4(self)
+    print("\n🏁 PHASE 4: VICTORY! You survived the desert journey!")
+    self.level2_phase = 4
+    
+    -- Clear all spawned objects
+    cleanup_spawned_objects(self)
     
     -- Exit train mode - restore player physics
     msg.post("player", "exit_train_mode")
@@ -229,7 +352,7 @@ function start_phase3(self)
     -- Take input focus for restart
     msg.post(".", "acquire_input_focus")
     
-    print("🎉 LEVEL 2 COMPLETE! Great job surviving the journey!")
+    print("🎉 LEVEL 2 COMPLETE! Great job surviving the 30-second desert journey!")
 end
 
 function start_level_2(self)

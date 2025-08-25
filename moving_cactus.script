@@ -1,0 +1,26 @@
+go.property("speed", 100)  -- Movement speed (pixels/second)
+
+function init(self)
+    self.screen_width = 960
+    self.speed = self.speed or 100
+end
+
+function update(self, dt)
+    -- Move left across screen
+    local pos = go.get_position()
+    pos.x = pos.x - self.speed * dt
+    go.set_position(pos)
+    
+    -- Self-destruct when off-screen
+    if pos.x < -100 then
+        go.delete()
+    end
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("set_cactus_type") then
+        -- Set which cactus sprite to display
+        local cactus_type = message.cactus_type or "cactus1"
+        msg.post("#sprite", "play_animation", {id = hash(cactus_type)})
+    end
+end

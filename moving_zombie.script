@@ -1,0 +1,21 @@
+go.property("speed", 80)  -- Movement speed (pixels/second)
+
+function init(self)
+    self.screen_width = 960
+    self.speed = self.speed or 80
+    
+    -- Start walking animation
+    msg.post("#sprite", "play_animation", {id = hash("walk")})
+end
+
+function update(self, dt)
+    -- Move left across screen
+    local pos = go.get_position()
+    pos.x = pos.x - self.speed * dt
+    go.set_position(pos)
+    
+    -- Self-destruct when off-screen
+    if pos.x < -100 then
+        go.delete()
+    end
+end

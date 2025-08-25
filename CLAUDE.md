@@ -267,18 +267,19 @@ function update_camera(self)
 end
 ```
 
-## Status: LEVEL 2 THREE-PHASE SYSTEM COMPLETE! 🚂✅
-## Current: READY FOR MOVING OBJECTS & ZOMBIE INTEGRATION! 🎮
+## Status: LEVEL 2 FOUR-PHASE SYSTEM COMPLETE! 🚂🌵✅
+## Current: COMPLETE DESERT JOURNEY WITH MOVING OBSTACLES! 🎮
 
-### Latest Progress (December 11-12, 2024)
-- ✅ **Level 2 Three-Phase System**: Complete platformer → train ride → victory progression
+### Latest Progress (August 25, 2025)
+- ✅ **Level 2 Four-Phase System**: Complete platformer → train ride → desert obstacles → victory
 - ✅ **Train Integration**: Perfect offset-based attachment system, player renders on top
 - ✅ **Platform System**: 5 platforms + centralized coordinate management - **WORKING PERFECTLY!**
-- ✅ **Background Switching**: Automatic phase transitions (screen_2_bg → screen_3_bg → victory)
+- ✅ **Background Switching**: Automatic phase transitions (screen_2_bg → screen_3_bg → screen_3_bg_blank → victory)
+- ✅ **Desert Obstacle System**: Dynamic cacti and zombie spawning with movement - **NEW!**
 - ✅ **Victory System**: you_win.png screen with proper win condition
-- ✅ **Technical Foundation**: Train mode physics, Z-depth layering, window-safe movement
+- ✅ **Technical Foundation**: Train mode physics, Z-depth layering, factory system, dynamic object management
 
-### Level 2 Three-Phase Design Plan 🚂
+### Level 2 Four-Phase Design Plan 🚂🌵
 
 **PHASE 1: Static Platformer** ✅ **COMPLETE**
 - Player navigates 5 platforms to reach train at (132, 391) with Z-depth -0.05 (behind player)
@@ -286,17 +287,31 @@ end
 - **Train Platform**: Wide boarding area (X 40-230, Y 330) for easy access
 - **Transition**: Player collision with train platform triggers Phase 2
 
-**PHASE 2: Moving Train Defense** ✅ **COMPLETE**
-- Background switches to screen_3_bg.png (featureless desert rail scene)
+**PHASE 2: Moving Train Journey** ✅ **COMPLETE**
+- Background switches to screen_3_bg.png (desert rail scene with landscape)
 - Train moves right at 70 pixels/second with player attached via offset system
 - **Player Attachment**: Offset-based positioning, gravity disabled, can move relative to train
 - **Z-Depth**: Player at Z=0 renders on top of train at Z=-0.05
 - **Window Safe**: No falling when switching windows - position always calculated
-- **Transition**: Train reaches X=1100 triggers Phase 3
+- **Transition**: Train reaches X=1100 (exits screen) triggers Phase 3
 
-**PHASE 3: Victory Screen** ✅ **COMPLETE**
-- Shows you_win.png victory screen overlay
+**PHASE 3: Desert Obstacle Journey** 🌵 **NEW & COMPLETE**
+- Background switches to screen_3_bg_blank.png (blank desert for moving objects)
+- **30-Second Timer**: Phase lasts exactly 30 seconds before victory
+- **Moving Cacti**: Spawn every 2 seconds using cactus1-4.png, move left at 100px/sec
+  - Spawn randomly above/below rails (not on rails level at Y=320)
+  - Use factory system for dynamic creation and cleanup
+- **Moving Zombies**: Spawn every 3 seconds, move left at 80px/sec with walking animation
+  - Always spawn on rails level (Y=320) 
+  - Use zombie.atlas walking animation
+- **Player Movement**: Stays in train mode (no gravity), can move around screen freely
+- **No Collision Detection**: Objects pass through player (collision to be added later)
+- **Transition**: After 30 seconds triggers Phase 4
+
+**PHASE 4: Victory Screen** ✅ **COMPLETE**
+- Shows you_win.png victory screen overlay  
 - Victory message: "🎉--- YOU WIN! Press R to restart ---🎉"
+- Cleans up all spawned desert objects
 - Exits train mode and restores normal player physics
 - R key restarts to Level 1
 
@@ -316,12 +331,53 @@ end
 - **Z-Depth Layering**: Player renders on top of train
 - **Input Focus Management**: Proper state transitions between phases
 
-### Next Development Phase 🚧
-**Ready to Implement**: Moving environmental objects system for Phase 2
-- **Spawn System**: Cacti, houses, rocks moving right-to-left over screen_3_bg.png
-- **Zombie System**: Dynamic zombie spawning during train ride  
+### Desert Obstacle System Technical Implementation 🌵✅
+
+#### Factory System Implementation
+- **Cactus Factory**: `/main/cactus_factory.factory` → creates `MovingCactus.go` instances
+- **Zombie Factory**: `/main/zombie_factory.factory` → creates `MovingZombie.go` instances
+- **Dynamic Spawning**: Objects spawn off-screen right, move left, self-destruct when off-screen left
+- **Cleanup System**: All spawned objects tracked and cleaned up on phase transitions
+
+#### New Game Objects Created
+- **MovingCactus.go** + **MovingCactus.sprite** + **moving_cactus.script**
+  - Uses `cactus.atlas` with cactus1-4.png animations
+  - Self-moving at configurable speed (100px/sec default)
+  - Responds to `set_cactus_type` message for random cactus selection
+- **MovingZombie.go** + **MovingZombie.sprite** + **moving_zombie.script**  
+  - Uses existing `zombie.atlas` with walking animation
+  - Self-moving at configurable speed (80px/sec default)
+  - Automatic walking animation playback
+
+#### Asset Files Created
+- **cactus.atlas**: Atlas containing cactus1, cactus2, cactus3, cactus4 animations
+- **background.atlas**: Updated with `screen_3_bg_blank` animation entry
+- **Factory files**: Added to `main/main.collection` embedded components
+
+#### Spawning Logic (main/main.script)
+```lua
+-- Desert phase variables
+self.desert_phase_timer = 0          -- 30-second countdown
+self.cactus_spawn_timer = 0          -- Spawn cactus every 2 seconds  
+self.zombie_spawn_timer = 0          -- Spawn zombie every 3 seconds
+self.spawned_objects = {}            -- Track for cleanup
+
+-- Smart cactus positioning
+local rails_y = 320
+if math.random() < 0.5 then
+    spawn_y = math.random(rails_y + 50, screen_height - 50)  -- Above rails
+else  
+    spawn_y = math.random(50, rails_y - 50)                  -- Below rails
+end
+```
+
+### Next Development Phase 🚧  
+**Potential Future Features**:
+- **Collision Detection**: Add collision between player and desert objects
 - **Combat Mechanics**: Player shooting system for zombie defense
-- **Distance Tracking**: Progress measurement through desert journey
+- **Power-ups**: Temporary invincibility or speed boosts during desert phase
+- **Difficulty Scaling**: Faster spawning or movement speeds over time
+- **Sound Effects**: Audio for object spawning, movement, and destruction
 
 ### Recent Updates (Current Session)
 
@@ -359,11 +415,23 @@ end
 ```
 /Users/fernandoipar/Dead Rails/
 ├── main/
-│   ├── main.collection         # Updated spawn positions
-│   └── main.script             # Added stage completion system, fixed positioning
+│   ├── main.collection         # Updated with factory components
+│   ├── main.script             # Four-phase system + desert object spawning
+│   ├── cactus_factory.factory  # Factory for spawning moving cacti  
+│   └── zombie_factory.factory  # Factory for spawning moving zombies
+├── MovingCactus.go             # Moving cactus game object
+├── MovingCactus.sprite         # Cactus sprite component (fixed format)
+├── moving_cactus.script        # Cactus movement and cleanup logic
+├── MovingZombie.go             # Moving zombie game object  
+├── MovingZombie.sprite         # Zombie sprite component (fixed format)
+├── moving_zombie.script        # Zombie movement and animation logic
+├── cactus.atlas                # Atlas for cactus1-4.png sprites
+├── background.atlas            # Updated with screen_3_bg_blank animation
 ├── player.script               # Added position debugging
 ├── zombie.script               # Added position debugging
 ├── background.sprite           # Resized to 960x640
+├── cactus1.png - cactus4.png   # Cactus sprite assets
+├── screen_3_bg_blank.png       # Blank desert background for moving objects
 ├── bg_1.png, bg_2.png, main_bg.png  # Converted from HEIC and resized
 └── input/
     └── game.input_binding      # Maintained existing controls
